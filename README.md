@@ -84,3 +84,30 @@
     * 1차 캐시엔 스냅샷이 있음 (최초 영속성 컨텍스트에 들어왔을 당시에 상태를 저장)
       * 스냅샷과 엔티티 값을 비교 후 처리
   * 지연 로딩
+
+#### 엔티티 매핑
+* DB 스키마 자동 생성
+  * 실무에선 사용하지 않는 것이 좋음
+  * hibernate.hbm2ddl.auto
+    * create : 테이블 생성
+    * create-drop : 테이블 생성 후 종료 시점에 테이블 드랍
+    * update : 변경된 부분만 반영
+    * validate : 엔티티와 테이블의 정상 매핑 여부 확인
+    * none : 사용하지 않음
+* 객체, 테이블 매핑
+  * @Entity
+    * 해당 어노테이션이 붙은 클래스 = 엔티티
+    * 기본 생성자 필수(public, protected)
+    * final, enum, interface, inner 클래스는 사용하지 못함
+    * 값 저장 필드는 final 사용하지 못함
+    * 속성
+      * name : JPA에서 사용할 엔티티 이름 지정(같은 클래스명이 없다면 일반적으로 기본 값 그대로 사용)
+      * catalog, schema 등 속성 존재
+  * @Table
+* 필드, 컬럼 매핑
+  * @Column
+* 기본키 매핑
+  * @Id
+* 연관관계 매핑
+  * @ManyToOne
+  * @JoinColumn
