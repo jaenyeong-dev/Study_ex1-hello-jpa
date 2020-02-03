@@ -18,5 +18,5 @@ dependencies {
 
     implementation group: 'org.hibernate', name: 'hibernate-entitymanager', version: '5.3.10.Final'
     implementation group: 'com.h2database', name: 'h2', version: '1.4.199'
-
+//    implementation group: 'org.projectlombok', name: 'lombok', version: '1.18.10'
 }
