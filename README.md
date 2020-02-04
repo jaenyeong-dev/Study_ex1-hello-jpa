@@ -87,27 +87,77 @@
 
 #### 엔티티 매핑
 * DB 스키마 자동 생성
-  * 실무에선 사용하지 않는 것이 좋음
+  * 실무에선 사용하지 않는 것이 좋음 (drop, lock 등 주의할 것)
   * hibernate.hbm2ddl.auto
     * create : 테이블 생성
     * create-drop : 테이블 생성 후 종료 시점에 테이블 드랍
     * update : 변경된 부분만 반영
     * validate : 엔티티와 테이블의 정상 매핑 여부 확인
     * none : 사용하지 않음
+  * DDL 생성 기능
+    * @Column의 unique, length 속성 등 DDL(DB)에만 영향을 줌
 * 객체, 테이블 매핑
-  * @Entity
+  * @Entity : 테이블(엔티티) 지정
     * 해당 어노테이션이 붙은 클래스 = 엔티티
     * 기본 생성자 필수(public, protected)
     * final, enum, interface, inner 클래스는 사용하지 못함
     * 값 저장 필드는 final 사용하지 못함
     * 속성
       * name : JPA에서 사용할 엔티티 이름 지정(같은 클래스명이 없다면 일반적으로 기본 값 그대로 사용)
-      * catalog, schema 등 속성 존재
-  * @Table
+      * catalog : 카탈로그 매핑
+      * schema : 스키마 매핑
+      * uniqueConstraints : DDL로 생성시 유니크 제약조건 생성
+  * @Table : 엔티티와 매핑할 테이블명
+  * @SequenceGenerator : 시퀀스 매핑
+    * name : 시퀀스 제네레이터명 (식별자 생성기명) [필수 값]
+    * sequenceName : 매핑할 DB 시퀀스명 (기본 값은 hibernate_sequences)
+    * initialValue : 초기값 설정
+    * allocationSize : 메모리를 통해 할당할 범위 사이즈 (기본 값은 50, [시퀀스 값이 1씩 증가하도록 설정 되어 있으면 이 값을 1로 반드시 설정])
+  * @TableGenerator : 키 생성 전용 테이블, 시퀀스를 흉내
+    * 모든 DB 사용 가능하나 성능 이슈
+    * name : 테이블 제네레이터명 (식별자 생성기명) [필수 값]
+    * table : 키 생성 테이블명 (기본 값은 hibernate_sequences)
+    * pkColumnName : 시퀀스 컬럼명 (기본값 sequence_name)
+    * initialValue : 초기 값 (마지막으로 생성된 값 기준, 기본값은 0)
+    * allocationSize : 시퀀스 한 번 호출에 증가하는 수 (기본값은 50) 성능 최적화
+    * catalog, schema : DB 카탈로그, 스키마명
+    * uniqueConstraint : 유니크 제약조건 지정
 * 필드, 컬럼 매핑
-  * @Column
+  * @Column : 일반 컬럼 지정
+    * name : 필드와 매핑할 테이블의 컬럼명
+    * insertable, updateable : 등록, 변경 가능 여부
+    * nullable : null 허용 여부 (false 설정시 DB에 not null 제약조건)
+    * unique : 컬럼에 unique 제약 조건 (제약조건명이 지정할 수 없어 잘 사용하지 않고 @Table 속성에 uniqueConstraints를 사용)
+    * columnDefinition : 컬럼 정보를 직접 정의
+    * length : String 타입에만 길이 제약조건 정의
+    * precision, scale : BigDecimal(BigInteger) 타입에서 사용
+      * precision : 소수점을 포함한 전체 자릿수
+      * scale : 소수의 자릿수
+  * @Enumerated : Enum 속성 매핑. 기본값(EnumType.ORDINAL)보다 EnumType.STRING(Enum 값)를 사용하는게 좋음
+    * EnumType.ORDINAL : enum [순서]를 DB에 저장
+    * EnumType.STRING : enum [이름]을 DB에 저장
+  * @Temporal : Date, Calendar 타입 지정
+    * java 8 이상시 해당 어노테이션 없이 그냥 LocalDate, LocalDateTime 타입만 사용하면 인식
+    * TemporalType.DATE : 날짜, DB date 타입 매핑
+    * TemporalType.TIME : 시간, DB time 타입 매핑
+    * TemporalType.TIMESTAMP : 날짜와 시간, DB timestamp 타입과 매핑
+  * @Lob : BLOB, CLOB(문자)와 매핑 (지정할 속성 없음)
+    * BLOB : byte[], java.sql.BLOB
+    * CLOB : String, char[], java.sql.CLOB
+  * @Transient : 매핑 안함
 * 기본키 매핑
-  * @Id
+  * @Id : 직접 할당
+  * @GeneratedValue (strategy = "아이덴티티, 시퀀스, 테이블 등 아래 값", generator = "@SequenceGenerator 에서 지정한 시퀀스 제네레이터명")
+    * GenerationType.IDENTITY : MySQL 등 기본키 생성을 DB에 위임
+      * 영속성 컨텍스트에서 관리하려면 PK가 필요한데 IDENTITY는 DB에 insert해야 Key 값을 알 수 있음
+      * 그래서 이 경우에만 em.persist() 했을 때 바로 DB에 insert함 (일반적으로 commit했을때만 DB에 처리됨)
+    * GenerationType.SEQUENCE : Oracle 등 시퀀스 오브젝트 사용
+      * @SequenceGenerator 필요
+    * GenerationType.TABLE : 키 생성용 테이블 사용 (벤더의 의존하지 않음)
+      * @TableGenerator 필요
+    * GenerationType.AUTO : 벤더에 따라 자동 지정 (위 세개중 하나)
+  * IDENTITY 특징
+
 * 연관관계 매핑
   * @ManyToOne
   * @JoinColumn
