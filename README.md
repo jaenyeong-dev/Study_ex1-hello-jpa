@@ -150,7 +150,7 @@
   * @GeneratedValue (strategy = "아이덴티티, 시퀀스, 테이블 등 아래 값", generator = "@SequenceGenerator 에서 지정한 시퀀스 제네레이터명")
     * GenerationType.IDENTITY : MySQL 등 기본키 생성을 DB에 위임
       * 영속성 컨텍스트에서 관리하려면 PK가 필요한데 IDENTITY는 DB에 insert해야 Key 값을 알 수 있음
-      * 그래서 이 경우에만 em.persist() 했을 때 바로 DB에 insert함 (일반적으로 commit했을때만 DB에 처리됨)
+      * 그래서 이 경우에만 em.persist() 했을 때 바로 DB에 insert함 (일반적으로 commit 했을 때만 DB에 처리됨)
     * GenerationType.SEQUENCE : Oracle 등 시퀀스 오브젝트 사용
       * @SequenceGenerator 필요
     * GenerationType.TABLE : 키 생성용 테이블 사용 (벤더의 의존하지 않음)
@@ -159,11 +159,17 @@
   * IDENTITY 특징
   * 기본키 매핑
     * @Column의 name 속성 대소문자는 개발 룰에 따를 것
+* 연관관계 매핑
+  * @ManyToOne
+  * @JoinColumn
     
 #### H2 DB 생성
 * jdbc:h2:tcp://localhost/~/jpashop 으로 연결 시 자동 생성
 * 자동 생성이 되지 않을 경우 jdbc:h2:~/jpashop 와 같이 persistence.xml을 수정한 후 시도
 
-* 연관관계 매핑
-  * @ManyToOne
-  * @JoinColumn
+#### 연관관계
+* 방향, 다중성, 연관관계의 주인
+* 예제 시나리오
+  * 회원과 팀이 존재
+  * 회원은 하나의 팀에만 소속
+  * 회원과 팀은 다대일 관계

@@ -16,8 +16,18 @@ public class Member {
 //	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(name = "name", nullable = false)
+	//	@Column(name = "name", nullable = false)
+	@Column(name = "USER_NAME", nullable = false)
 	private String userName;
+
+	// 패러다임 불일치
+//	@Column(name = "TEAM_ID")
+//	private Long teamId;
+
+	@ManyToOne
+//	@ManyToOne(fetch = FetchType.LAZY) 지연 로딩 전략
+	@JoinColumn(name = "TEAM_ID")
+	private Team team;
 
 //	private int age;
 //
@@ -69,6 +79,24 @@ public class Member {
 
 	public Member setUserName(String name) {
 		this.userName = name;
+		return this;
+	}
+
+//	public Long getTeamId() {
+//		return teamId;
+//	}
+//
+//	public Member setTeamId(Long teamId) {
+//		this.teamId = teamId;
+//		return this;
+//	}
+
+	public Team getTeam() {
+		return team;
+	}
+
+	public Member setTeam(Team team) {
+		this.team = team;
 		return this;
 	}
 }

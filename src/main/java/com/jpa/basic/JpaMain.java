@@ -60,26 +60,61 @@ public class JpaMain {
 //				System.out.println("member.name : " + mem.getName());
 //			}
 
-            Member memberA = new Member();
-//            member.setId("ID_A");
-			memberA.setUserName("A");
+//          Member memberA = new Member();
+////          member.setId("ID_A");
+//			memberA.setUserName("A");
+//
+//			Member memberB = new Member();
+//			memberB.setUserName("B");
+//
+//			Member memberC = new Member();
+//			memberC.setUserName("C");
+//
+//			System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+//
+//          em.persist(memberA);  // 1, 51
+//			em.persist(memberB);  // memory
+//			em.persist(memberC);  // memory
+//
+//			System.out.println("member A " + memberA.getId());
+//			System.out.println("member B " + memberB.getId());
+//			System.out.println("member C " + memberC.getId());
 
-			Member memberB = new Member();
-			memberB.setUserName("B");
+			// 패러다임 불일치로 인해 데이터를 가져오기 번거로움
+//			Team team = new Team();
+//			team.setName("TeamA");
+//			em.persist(team);
+//
+//			Member member = new Member();
+//			member.setUserName("member1");
+//			member.setTeamId(team.getId());
+//			em.persist(member);
+//
+//			Member findMember = em.find(Member.class, member.getId());
+//			Long findTeamId = findMember.getTeamId();
+//			Team findTeam = em.find(Team.class, findTeamId);
 
-			Member memberC = new Member();
-			memberC.setUserName("C");
+			Team team = new Team();
+			team.setName("TeamA");
+			em.persist(team);
 
-			System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+			Member member = new Member();
+			member.setUserName("member1");
+			member.setTeam(team);
+			em.persist(member);
 
-            em.persist(memberA);  // 1, 51
-			em.persist(memberB);  // memory
-			em.persist(memberC);  // memory
+			// 쿼리를 직접 실행하여 가져오고 싶을 때
+			em.flush();
+			em.clear();
 
-			System.out.println("member A " + memberA.getId());
-			System.out.println("member B " + memberB.getId());
-			System.out.println("member C " + memberC.getId());
+			Member findMember = em.find(Member.class, member.getId());
+			Team findTeam = findMember.getTeam();
+			System.out.println("find team name " + findTeam.getName());
 
+			// Team을 변경시 (100번 팀이 있다는 가정하에)
+//			Team newTeam = em.find(Team.class, 100L);
+//			findMember.setTeam(newTeam);
+			
 			// 커밋 시점에 insert
 			tx.commit();
 		} catch (Exception e) {
