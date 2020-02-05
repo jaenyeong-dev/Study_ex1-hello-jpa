@@ -134,7 +134,7 @@
       * precision : 소수점을 포함한 전체 자릿수
       * scale : 소수의 자릿수
   * @Enumerated : Enum 속성 매핑. 기본값(EnumType.ORDINAL)보다 EnumType.STRING(Enum 값)를 사용하는게 좋음
-    * EnumType.ORDINAL : enum [순서]를 DB에 저장
+    * EnumType.ORDINAL : enum [순서 0, 1, 2 ...]를 DB에 저장
     * EnumType.STRING : enum [이름]을 DB에 저장
   * @Temporal : Date, Calendar 타입 지정
     * java 8 이상시 해당 어노테이션 없이 그냥 LocalDate, LocalDateTime 타입만 사용하면 인식
@@ -157,6 +157,12 @@
       * @TableGenerator 필요
     * GenerationType.AUTO : 벤더에 따라 자동 지정 (위 세개중 하나)
   * IDENTITY 특징
+  * 기본키 매핑
+    * @Column의 name 속성 대소문자는 개발 룰에 따를 것
+    
+#### H2 DB 생성
+* jdbc:h2:tcp://localhost/~/jpashop 으로 연결 시 자동 생성
+* 자동 생성이 되지 않을 경우 jdbc:h2:~/jpashop 와 같이 persistence.xml을 수정한 후 시도
 
 * 연관관계 매핑
   * @ManyToOne

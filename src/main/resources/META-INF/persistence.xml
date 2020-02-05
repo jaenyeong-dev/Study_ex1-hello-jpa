@@ -4,12 +4,21 @@
              xsi:schemaLocation="http://java.sun.com/xml/ns/persistence
  http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
 
-    <persistence-unit name="jpaBasic">
-        <class>com.jpa.basic.Member</class>
+    <persistence-unit name="jpaShop">
+        <!-- 클래스 인식 못할 경우 -->
+<!--        <class>com.jpa.basic.Member</class>-->
+        <class>com.jpabook.jpashop.domain.Item</class>
+        <class>com.jpabook.jpashop.domain.Member</class>
+        <class>com.jpabook.jpashop.domain.Order</class>
+        <class>com.jpabook.jpashop.domain.OrderItem</class>
+        <class>com.jpabook.jpashop.domain.OrderStatus</class>
+
         <properties>
             <!-- Require -->
             <property name="javax.persistence.jdbc.Driver" value="org.h2.Driver" />
-            <property name="javax.persistence.jdbc.url" value="jdbc:h2:tcp://localhost/~/test" />
+            <property name="javax.persistence.jdbc.url" value="jdbc:h2:tcp://localhost/~/jpashop" />
+            <!-- H2 DB가 생성되지 않을 경우 아래와 같이 시도 -->
+<!--            <property name="javax.persistence.jdbc.url" value="jdbc:h2:~/jpashop" />-->
             <property name="javax.persistence.jdbc.user" value="sa" />
             <property name="javax.persistence.jdbc.password" value="" />
             <property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect" />
@@ -19,6 +28,7 @@
             <property name="hibernate.format_sql" value="true" />
             <property name="hibernate.use_sql-comments" value="true" />
 <!--            <property name="hibernate.jdbc.batch_size" value="10"/>-->
+            <!-- 운영에선 사용하지 말 것 -->
             <property name="hibernate.hbm2ddl.auto" value="create"/>
         </properties>
     </persistence-unit>
