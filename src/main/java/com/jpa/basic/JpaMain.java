@@ -4,6 +4,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
+import java.util.List;
 
 public class JpaMain {
 
@@ -27,7 +28,6 @@ public class JpaMain {
 
 //			Member member = new Member(101L, "TEST");
 //			em.persist(member);
-
 
 			// 영속
 //			System.out.println(">> Before <<");
@@ -94,27 +94,45 @@ public class JpaMain {
 //			Long findTeamId = findMember.getTeamId();
 //			Team findTeam = em.find(Team.class, findTeamId);
 
+			// 연관관계 매핑
 			Team team = new Team();
 			team.setName("TeamA");
 			em.persist(team);
 
 			Member member = new Member();
 			member.setUserName("member1");
-			member.setTeam(team);
+			// 아래 team.addMember(member); 메소드로 대체 (한 쪽에만 있는 것이 좋음)
+//			member.changeTeam(team); // setter 대신 작성한 메소드를 사용
 			em.persist(member);
 
-			// 쿼리를 직접 실행하여 가져오고 싶을 때
-			em.flush();
-			em.clear();
+			// 역방향만 연관관계 설정
+			// 1. em.flush(), em.clear()를 하지 않을경우 직접 호출하여 1차 캐시에 저장해야함
+			// 2. Test Case를 위하여
+			// 연관관계 편의 메소를 생성하여 아래 로직을 메소드 안에서 실행
+//			team.getMembers().add(member);
+			team.addMember(member); // setter 대신 작성한 메소드를 사용
 
-			Member findMember = em.find(Member.class, member.getId());
-			Team findTeam = findMember.getTeam();
-			System.out.println("find team name " + findTeam.getName());
+			// 쿼리를 직접 실행하여 가져오고 싶을 때
+//			em.flush();
+//			em.clear();
+
+//			Member findMember = em.find(Member.class, member.getId());
+//			Team findTeam = findMember.getTeam();
+//			System.out.println("find team name " + findTeam.getName());
+
+			Team findTeam = em.find(Team.class, team.getId());
+
+			List<Member> teamMembers = findTeam.getMembers();
+
+			for (Member m : teamMembers) {
+				System.out.println("member = " + m.getUserName());
+			}
 
 			// Team을 변경시 (100번 팀이 있다는 가정하에)
 //			Team newTeam = em.find(Team.class, 100L);
 //			findMember.setTeam(newTeam);
-			
+
+
 			// 커밋 시점에 insert
 			tx.commit();
 		} catch (Exception e) {

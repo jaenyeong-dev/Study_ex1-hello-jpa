@@ -99,4 +99,11 @@ public class Member {
 		this.team = team;
 		return this;
 	}
+
+	// Team addMember() 메소드로 대체
+//	public Member changeTeam(Team team) {
+//		this.team = team;
+//		this.team.getMembers().add(this);
+//		return this;
+//	}
 }

@@ -1,6 +1,8 @@
 package com.jpabook.jpashop.domain;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 public class Member {
@@ -13,6 +15,12 @@ public class Member {
 	private String city;
 	private String street;
 	private String zipCode;
+
+	// 여기서 Member 안에 Order가 있는 건 일반적으로 좋지 않은 설계이나 여기서는 그냥 진행
+	// 관례로 ArrayList 초기화 (Null 방지)
+	// mappedBy는 orders의 Member 필드 변수명 member
+	@OneToMany(mappedBy = "member")
+	private List<Order> orders = new ArrayList<>();
 
 	public Long getId() {
 		return id;
@@ -56,6 +64,15 @@ public class Member {
 
 	public Member setZipCode(String zipCode) {
 		this.zipCode = zipCode;
+		return this;
+	}
+
+	public List<Order> getOrders() {
+		return orders;
+	}
+
+	public Member setOrders(List<Order> orders) {
+		this.orders = orders;
 		return this;
 	}
 }
