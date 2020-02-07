@@ -1,6 +1,8 @@
 package com.jpa.basic;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @SequenceGenerator(name = "member_seq_generator", sequenceName = "member_seq", initialValue = 1, allocationSize = 50)
@@ -24,9 +26,15 @@ public class Member {
 //	@Column(name = "TEAM_ID")
 //	private Long teamId;
 
+	// 일대다 단방향일 때 주석처리
+//	@ManyToOne
+////	@ManyToOne(fetch = FetchType.LAZY) 지연 로딩 전략
+//	@JoinColumn(name = "TEAM_ID")
+//	private Team team;
+
+	// 일대다 양방향
 	@ManyToOne
-//	@ManyToOne(fetch = FetchType.LAZY) 지연 로딩 전략
-	@JoinColumn(name = "TEAM_ID")
+	@JoinColumn(name = "TEAM_ID", insertable = false, updatable = false) // 읽기 전용
 	private Team team;
 
 //	private int age;
@@ -46,6 +54,19 @@ public class Member {
 //	// DB에서 사용하지 않을때
 //	@Transient
 //	private int temp;
+
+	@OneToOne
+	@JoinColumn(name = "LOCKER_ID")
+	private Locker locker;
+
+	// 다대다
+//	@ManyToMany
+//	@JoinTable(name = "MEMBER_PRODUCT")
+//	private List<Product> products = new ArrayList<>();
+
+	// 다대다에서 매핑 엔티티 생성한 경우
+	@OneToMany(mappedBy = "member")
+	private List<MemberProduct> memberProducts = new ArrayList<>();
 
 	public Member() {
 	}
@@ -91,14 +112,14 @@ public class Member {
 //		return this;
 //	}
 
-	public Team getTeam() {
-		return team;
-	}
-
-	public Member setTeam(Team team) {
-		this.team = team;
-		return this;
-	}
+//	public Team getTeam() {
+//		return team;
+//	}
+//
+//	public Member setTeam(Team team) {
+//		this.team = team;
+//		return this;
+//	}
 
 	// Team addMember() 메소드로 대체
 //	public Member changeTeam(Team team) {
