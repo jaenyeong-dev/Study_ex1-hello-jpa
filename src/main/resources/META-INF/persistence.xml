@@ -8,11 +8,12 @@
 <!--    <persistence-unit name="jpaShop">-->
 
         <!-- 클래스 인식 못할 경우 -->
-        <class>com.jpa.basic.Member</class>
-        <class>com.jpa.basic.Team</class>
-        <class>com.jpa.basic.Locker</class>
-        <class>com.jpa.basic.Product</class>
-        <class>com.jpa.basic.MemberProduct</class>
+        <!-- 상위 추상 클래스는 포함하지 않아도 정상 작동 -->
+        <class>com.jpa.basic.entity.Member</class>
+        <class>com.jpa.basic.entity.Team</class>
+        <class>com.jpa.basic.entity.Locker</class>
+        <class>com.jpa.basic.entity.Product</class>
+        <class>com.jpa.basic.entity.MemberProduct</class>
         <class>com.jpa.basic.InheritanceMapping.Item</class>
         <class>com.jpa.basic.InheritanceMapping.Album</class>
         <class>com.jpa.basic.InheritanceMapping.Book</class>

@@ -1,11 +1,14 @@
 package com.jpa.basic;
 
 import com.jpa.basic.InheritanceMapping.Movie;
+import com.jpa.basic.entity.Member;
+import com.jpa.basic.entity.Team;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class JpaMain {
@@ -32,19 +35,9 @@ public class JpaMain {
 
 //			oneToManyExample(em);
 
-			Movie movie = new Movie();
-			movie.setDirector("A");
-			movie.setActor("B");
-			movie.setName("Wind");
-			movie.setPrice(10000);
+//			inheritanceMappingExample(em);
 
-			em.persist(movie);
-
-			em.flush();
-			em.clear();
-
-			Movie findMovie = em.find(Movie.class, movie.getId());
-			System.out.println("find Movie " + findMovie);
+			mappedSuperclassExample(em);
 
 			// 커밋 시점에 insert
 			tx.commit();
@@ -57,6 +50,35 @@ public class JpaMain {
 		}
 		emf.close();
 
+	}
+
+	private static void mappedSuperclassExample(EntityManager em) {
+		Member member =new Member();
+		member.setUserName("user1");
+		member.setCreatedBy("Kim");
+		member.setCreatedDate(LocalDateTime.now());
+
+		em.persist(member);
+
+		em.flush();
+		em.clear();
+
+	}
+
+	private static void inheritanceMappingExample(EntityManager em) {
+		Movie movie = new Movie();
+		movie.setDirector("A");
+		movie.setActor("B");
+		movie.setName("Wind");
+		movie.setPrice(10000);
+
+		em.persist(movie);
+
+		em.flush();
+		em.clear();
+
+		Movie findMovie = em.find(Movie.class, movie.getId());
+		System.out.println("find Movie " + findMovie);
 	}
 
 	private static void oneToManyExample(EntityManager em) {

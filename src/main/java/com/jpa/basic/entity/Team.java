@@ -1,11 +1,11 @@
-package com.jpa.basic;
+package com.jpa.basic.entity;
 
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-public class Team {
+public class Team extends BaseEntity {
 
 	@Id
 	@GeneratedValue
@@ -19,6 +19,11 @@ public class Team {
 	@OneToMany
 	@JoinColumn(name = "TEAM_ID") // 일대다 단방향 참조일 때 추가 (@JoinColumn을 사용하지 않으면 중간에 조인 테이블이 생김)
 	private List<Member> members = new ArrayList<>();
+
+//	private String createdBy;
+//	private LocalDateTime createdDate;
+//	private String lastModifiedBy;
+//	private LocalDateTime lastModifiedDate;
 
 	// 일대다 단방향 참조일 때 주석
 //	public void addMember(Member member) {

@@ -32,7 +32,7 @@
   * persistence.xml 파일 안에 설정한 javax.persistence.jdbc.url 속성 "jdbc:h2:tcp://localhost/~/test" 값 그대로 사용
 
 #### @Entity 어노테이션이 해당 클래스를 못찾는 경우
-* persistence.xml 파일 안에 <class>com.jpa.basic.Member</class> 태그 삽입
+* persistence.xml 파일 안에 <class>com.jpa.basic.entity.Member</class> 태그 삽입
   * Hibernate만 별도로 사용할 경우 설정
   * Spring을 같이 사용할 경우 엔티티 스캔 기능으로 인하여 따로 설정이 필요 없음
   
@@ -336,3 +336,13 @@
     * 슈퍼클래스에 태깅 (기본 컬럼명은 DTYPE)
   * @DiscriminatorValue("XXX")
     * 하위클래스에서 태깅 및 값 바인딩 (기본값은 서브클래스명)
+* @MappedSuperclass
+  * 공통 매핑 정보가 필요할 때 사용(id, name)
+  * [주의] 상속관계 매핑이 아님
+  * 엔티티가 아님, 테이블과 매핑하지 말 것
+  * 슈퍼클래스를 상속 받는 서브클래스에 매핑 정보만 제공
+  * 조회, 검색 불가능 (em.find(BaseEntity) 등 불가능)
+  * 직접 생성, 사용할 일이 없어 추상 클래스로 생성하길 권장
+  * 테이블과 관계 없고, 단순히 엔티티들이 공통으로 사용하는 매핑 정보를 모으는 역할
+  * 주로 등록일, 수정일, 등록자, 수정자 같은 전체 엔티티에서 공통적으로 사용, 적용하는 정보를 모을 때 사용
+  * @Entity 클래스는 엔티티나 @MappedSuperclass로 지정한 클래만 상속 가능함

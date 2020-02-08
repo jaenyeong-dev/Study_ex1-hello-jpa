@@ -1,4 +1,4 @@
-package com.jpa.basic;
+package com.jpa.basic.entity;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -7,7 +7,7 @@ import java.util.List;
 @Entity
 @SequenceGenerator(name = "member_seq_generator", sequenceName = "member_seq", initialValue = 1, allocationSize = 50)
 //@TableGenerator(name = "MEMBER_SEQ_GENERATOR", table = "MY_SEQUENCES", pkColumnValue = "MEMBER_SEQ", allocationSize = 1)
-public class Member {
+public class Member extends BaseEntity {
 //	@Id
 //	private Long id;
 //	private String name;
@@ -67,6 +67,11 @@ public class Member {
 	// 다대다에서 매핑 엔티티 생성한 경우
 	@OneToMany(mappedBy = "member")
 	private List<MemberProduct> memberProducts = new ArrayList<>();
+
+//	private String createdBy;
+//	private LocalDateTime createdDate;
+//	private String lastModifiedBy;
+//	private LocalDateTime lastModifiedDate;
 
 	public Member() {
 	}
