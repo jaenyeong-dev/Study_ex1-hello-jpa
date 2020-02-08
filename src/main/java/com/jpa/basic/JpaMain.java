@@ -1,5 +1,7 @@
 package com.jpa.basic;
 
+import com.jpa.basic.InheritanceMapping.Movie;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
@@ -29,6 +31,20 @@ public class JpaMain {
 //			associateExample(em);
 
 //			oneToManyExample(em);
+
+			Movie movie = new Movie();
+			movie.setDirector("A");
+			movie.setActor("B");
+			movie.setName("Wind");
+			movie.setPrice(10000);
+
+			em.persist(movie);
+
+			em.flush();
+			em.clear();
+
+			Movie findMovie = em.find(Movie.class, movie.getId());
+			System.out.println("find Movie " + findMovie);
 
 			// 커밋 시점에 insert
 			tx.commit();
