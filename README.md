@@ -292,7 +292,6 @@
     * cascade : 영속성 전이 기능 사용
     * targetEntity : 연관된 엔티티의 타입 정보 설정. 거의 사용하지 않음 > 컬렉션을 사용해도 제네릭으로 타입 정보를 알 수 있음
     
-
 #### Drop table error
 * error message : Cannot drop "CATEGORY" because "FKJIP0OR3VEMIXCCL6VX0KLUJ03" depends on it; SQL statement:
 * 위와 같이 CATEGORY, DELIVERY 등 테이블 삭제시 인덱스에 의해 테이블 삭제 실패 에러 발생
@@ -346,3 +345,4 @@
   * 테이블과 관계 없고, 단순히 엔티티들이 공통으로 사용하는 매핑 정보를 모으는 역할
   * 주로 등록일, 수정일, 등록자, 수정자 같은 전체 엔티티에서 공통적으로 사용, 적용하는 정보를 모을 때 사용
   * @Entity 클래스는 엔티티나 @MappedSuperclass로 지정한 클래만 상속 가능함
+

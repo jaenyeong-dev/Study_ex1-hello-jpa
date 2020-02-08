@@ -4,35 +4,40 @@
              xsi:schemaLocation="http://java.sun.com/xml/ns/persistence
  http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
 
-    <persistence-unit name="jpaBasic">
-<!--    <persistence-unit name="jpaShop">-->
+<!--    <persistence-unit name="jpaBasic">-->
+    <persistence-unit name="jpaShop">
 
         <!-- 클래스 인식 못할 경우 -->
         <!-- 상위 추상 클래스는 포함하지 않아도 정상 작동 -->
-        <class>com.jpa.basic.entity.Member</class>
-        <class>com.jpa.basic.entity.Team</class>
-        <class>com.jpa.basic.entity.Locker</class>
-        <class>com.jpa.basic.entity.Product</class>
-        <class>com.jpa.basic.entity.MemberProduct</class>
-        <class>com.jpa.basic.InheritanceMapping.Item</class>
-        <class>com.jpa.basic.InheritanceMapping.Album</class>
-        <class>com.jpa.basic.InheritanceMapping.Book</class>
-        <class>com.jpa.basic.InheritanceMapping.Movie</class>
 
-<!--        <class>com.jpabook.jpashop.domain.Item</class>-->
-<!--        <class>com.jpabook.jpashop.domain.Member</class>-->
-<!--        <class>com.jpabook.jpashop.domain.Order</class>-->
-<!--        <class>com.jpabook.jpashop.domain.OrderItem</class>-->
-<!--        <class>com.jpabook.jpashop.domain.OrderStatus</class>-->
-<!--        <class>com.jpabook.jpashop.domain.Category</class>-->
-<!--        <class>com.jpabook.jpashop.domain.Delivery</class>-->
-<!--        <class>com.jpabook.jpashop.domain.DeliveryStatus</class>-->
+<!--        <class>com.jpa.basic.entity.Member</class>-->
+<!--        <class>com.jpa.basic.entity.Team</class>-->
+<!--        <class>com.jpa.basic.entity.Locker</class>-->
+<!--        <class>com.jpa.basic.entity.Product</class>-->
+<!--        <class>com.jpa.basic.entity.MemberProduct</class>-->
+<!--        <class>com.jpa.basic.InheritanceMapping.Item</class>-->
+<!--        <class>com.jpa.basic.InheritanceMapping.Album</class>-->
+<!--        <class>com.jpa.basic.InheritanceMapping.Book</class>-->
+<!--        <class>com.jpa.basic.InheritanceMapping.Movie</class>-->
+
+        <class>com.jpabook.jpashop.domain.Item</class>
+        <class>com.jpabook.jpashop.domain.Member</class>
+        <class>com.jpabook.jpashop.domain.Order</class>
+        <class>com.jpabook.jpashop.domain.OrderItem</class>
+        <class>com.jpabook.jpashop.domain.OrderStatus</class>
+        <class>com.jpabook.jpashop.domain.Category</class>
+        <class>com.jpabook.jpashop.domain.Delivery</class>
+        <class>com.jpabook.jpashop.domain.DeliveryStatus</class>
+        <class>com.jpabook.jpashop.domain.Album</class>
+        <class>com.jpabook.jpashop.domain.Book</class>
+        <class>com.jpabook.jpashop.domain.Movie</class>
+        <class>com.jpabook.jpashop.domain.BaseEntity</class>
 
         <properties>
             <!-- Require -->
             <property name="javax.persistence.jdbc.Driver" value="org.h2.Driver" />
-            <property name="javax.persistence.jdbc.url" value="jdbc:h2:tcp://localhost/~/test" />
-<!--            <property name="javax.persistence.jdbc.url" value="jdbc:h2:tcp://localhost/~/jpashop" />-->
+<!--            <property name="javax.persistence.jdbc.url" value="jdbc:h2:tcp://localhost/~/test" />-->
+            <property name="javax.persistence.jdbc.url" value="jdbc:h2:tcp://localhost/~/jpashop" />
             <!-- H2 DB가 생성되지 않을 경우 아래와 같이 시도 -->
 <!--            <property name="javax.persistence.jdbc.url" value="jdbc:h2:~/jpashop" />-->
             <property name="javax.persistence.jdbc.user" value="sa" />

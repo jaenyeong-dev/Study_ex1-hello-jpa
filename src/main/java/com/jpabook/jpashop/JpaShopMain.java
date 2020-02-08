@@ -1,5 +1,6 @@
 package com.jpabook.jpashop;
 
+import com.jpabook.jpashop.domain.Book;
 import com.jpabook.jpashop.domain.Order;
 import com.jpabook.jpashop.domain.OrderItem;
 
@@ -23,6 +24,8 @@ public class JpaShopMain {
 
 //			basicExample(em);
 
+			inheritanceExample(em);
+
 			tx.commit();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -33,6 +36,14 @@ public class JpaShopMain {
 		}
 		emf.close();
 
+	}
+
+	private static void inheritanceExample(EntityManager em) {
+		Book book = new Book();
+		book.setName("JPA");
+		book.setAuthor("Noah");
+
+		em.persist(book);
 	}
 
 	private static void basicExample(EntityManager em) {
