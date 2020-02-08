@@ -21,13 +21,7 @@ public class JpaShopMain {
 
 		try {
 
-			Order order = new Order();
-//			order.addOrderItem(new OrderItem());
-
-			OrderItem orderItem = new OrderItem();
-			orderItem.setOrder(order);
-
-			em.persist(orderItem);
+//			basicExample(em);
 
 			tx.commit();
 		} catch (Exception e) {
@@ -39,5 +33,15 @@ public class JpaShopMain {
 		}
 		emf.close();
 
+	}
+
+	private static void basicExample(EntityManager em) {
+		Order order = new Order();
+//			order.addOrderItem(new OrderItem());
+
+		OrderItem orderItem = new OrderItem();
+		orderItem.setOrder(order);
+
+		em.persist(orderItem);
 	}
 }

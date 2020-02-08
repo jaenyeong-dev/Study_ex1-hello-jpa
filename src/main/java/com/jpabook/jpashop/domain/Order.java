@@ -32,6 +32,10 @@ public class Order {
 	@Enumerated(EnumType.STRING)
 	private OrderStatus status;
 
+	@OneToOne
+	@JoinColumn(name = "DELIVERY_ID")
+	private Delivery delivery;
+
 	public void addOrderItem(OrderItem orderItem) {
 		orderItems.add(orderItem);
 		orderItem.setOrder(this);
@@ -81,4 +85,5 @@ public class Order {
 		this.status = status;
 		return this;
 	}
+
 }

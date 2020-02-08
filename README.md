@@ -259,4 +259,42 @@
   * 2군데 중 외래키를 관리할 곳을 지정
   * 연관관계 주인 : 외래키를 관리하는 참조
   * 주인 반대편 : 외래키에 영향을 주지 않음, 단순 조회
+* 예제
+  * 배송 추가
+    * 주문과 배송은 1:1 (@OneToMany)
+    * 상품과 카테고리는 N:M (@ManyToMany)
+    * 주문의 배송 필드 포함
+    * CATEGORY_ITEM 테이블로 카테고리와 아이템 다대다 매핑
+    * Order, Delivery 엔티티는 양방향 매핑
+    * Category, Item 엔티티는 양방향 매핑, 매핑 엔티티 없음
+* 정리
+  * N:M 관계는 1:N, N:1 (중간 매핑 테이블을 이용)
+  * 운영상 중간 매핑 테이블은 단순하지 않음
+  * @ManyToMany는 운영상 사용하지 않는 것을 권장(필드 추가 X, 엔티티 테이블 불일치)
+  * @JoinColumn
+    * name : 매핑할 외래키명 (기본값은 )
+    * referencedColumnName : 외래키가 참조하는 대상 테이블의 컬럼명 (기본값은 참조 테이블의 기본키-컬럼명)
+    * foreignKey(DDL) : 외래키 제약조건 직접 지정 가능, 테이블 생성시만 사용함
+    * unique, nullable, insertable, updateable, columnDefinition, table : @Column 어노테이션의 속성과 동일
+  * @ManyToOne
+    * optional : false 설정시 연관된 엔티티가 항상 존재해야함 (기본값 true)
+    * fetch : 글로벌 패치 전략 설정 (즉시 로딩, 지연로딩)
+      * @ManyToOne=FetchType.EAGER
+      * @OneToMany=FetchType.LAZY
+    * cascade : 영속성 전이 기능 사용
+    * targetEntity : 연관된 엔티티의 타입 정보 설정. 거의 사용하지 않음 > 컬렉션을 사용해도 제네릭으로 타입 정보를 알 수 있음
+    * 다대일 매핑은 항상 연관관계 주인이 되어야 함 (mappedBy 속성이 없음)
+  * @OneToMany
+    * mappedBy : 연관관계의 주인 필드 선택
+    * fetch : 글로벌 패치 전략 설정 (즉시 로딩, 지연로딩)
+      * @ManyToOne=FetchType.EAGER
+      * @OneToMany=FetchType.LAZY
+    * cascade : 영속성 전이 기능 사용
+    * targetEntity : 연관된 엔티티의 타입 정보 설정. 거의 사용하지 않음 > 컬렉션을 사용해도 제네릭으로 타입 정보를 알 수 있음
+    
 
+#### Drop table error
+* error message : Cannot drop "CATEGORY" because "FKJIP0OR3VEMIXCCL6VX0KLUJ03" depends on it; SQL statement:
+* 위와 같이 CATEGORY, DELIVERY 등 테이블 삭제시 인덱스에 의해 테이블 삭제 실패 에러 발생
+* H2 버전(1.4.200)에 의한 에러로 생각됨 > 1.4.199 버전 사용할 것
+* H2 1.4.199버전 포함
