@@ -24,7 +24,7 @@ public class JpaShopMain {
 
 //			basicExample(em);
 
-			inheritanceExample(em);
+//			inheritanceExample(em);
 
 			tx.commit();
 		} catch (Exception e) {

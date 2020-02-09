@@ -55,18 +55,21 @@ public class Member extends BaseEntity {
 //	@Transient
 //	private int temp;
 
-	@OneToOne
-	@JoinColumn(name = "LOCKER_ID")
-	private Locker locker;
+	// 프록시 예제를 위한 주석
+	// Locker 1:1 매핑
+//	@OneToOne
+//	@JoinColumn(name = "LOCKER_ID")
+//	private Locker locker;
 
 	// 다대다
 //	@ManyToMany
 //	@JoinTable(name = "MEMBER_PRODUCT")
 //	private List<Product> products = new ArrayList<>();
 
+	// 프록시 예제를 위한 주석
 	// 다대다에서 매핑 엔티티 생성한 경우
-	@OneToMany(mappedBy = "member")
-	private List<MemberProduct> memberProducts = new ArrayList<>();
+//	@OneToMany(mappedBy = "member")
+//	private List<MemberProduct> memberProducts = new ArrayList<>();
 
 //	private String createdBy;
 //	private LocalDateTime createdDate;
@@ -117,14 +120,14 @@ public class Member extends BaseEntity {
 //		return this;
 //	}
 
-//	public Team getTeam() {
-//		return team;
-//	}
-//
-//	public Member setTeam(Team team) {
-//		this.team = team;
-//		return this;
-//	}
+	public Team getTeam() {
+		return team;
+	}
+
+	public Member setTeam(Team team) {
+		this.team = team;
+		return this;
+	}
 
 	// Team addMember() 메소드로 대체
 //	public Member changeTeam(Team team) {

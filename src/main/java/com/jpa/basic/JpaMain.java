@@ -3,6 +3,7 @@ package com.jpa.basic;
 import com.jpa.basic.InheritanceMapping.Movie;
 import com.jpa.basic.entity.Member;
 import com.jpa.basic.entity.Team;
+import org.hibernate.Hibernate;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -37,7 +38,9 @@ public class JpaMain {
 
 //			inheritanceMappingExample(em);
 
-			mappedSuperclassExample(em);
+//			mappedSuperclassExample(em);
+
+			proxyExample(em, emf);
 
 			// 커밋 시점에 insert
 			tx.commit();
@@ -52,8 +55,124 @@ public class JpaMain {
 
 	}
 
+	private static void proxyExample(EntityManager em, EntityManagerFactory emf) {
+//		Member findMember = em.find(Member.class, 1L);
+
+//		printMember(findMember);
+//		printMemberAndTeam(findMember);
+
+//		Member member = new Member();
+//		member.setUserName("Hello");
+//
+//		em.persist(member);
+//		em.flush();
+//		em.clear();
+//
+////    Member findMember = em.find(Member.class, member.getId()); // select 쿼리가 바로 실행
+//		Member findMember = em.getReference(Member.class, member.getId()); // 필요 할때 select 쿼리가 실행됨
+//
+//		System.out.println("Before findMember class : " + findMember.getClass());
+//		System.out.println("findMember ID : " + findMember.getId());
+//		System.out.println("findMember userName : " + findMember.getUserName());
+//		System.out.println("After findMember class : " + findMember.getClass());
+
+		Member member1 = new Member();
+		member1.setUserName("mem1");
+		em.persist(member1);
+
+		Member member2 = new Member();
+		member2.setUserName("mem2");
+		em.persist(member2);
+
+		em.flush();
+		em.clear();
+
+		Member m1 = em.find(Member.class, member1.getId());
+		Member m2 = em.getReference(Member.class, member2.getId());
+
+		System.out.println("m1 == m2 " + (m1.getClass() == m2.getClass()));
+		System.out.println("m1 instanceOf Member " + (m1 instanceof Member));
+		System.out.println("m2 instanceOf Member " + (m2 instanceof Member));
+
+		// 영속성 컨텍스트에 찾는 엔티티가 이미 존재하는 경우 em.getReference()를 호출해도 실제 엔티티 반환
+		Member member3 = new Member();
+		member3.setUserName("mem3");
+		em.persist(member3);
+
+		em.flush();
+		em.clear();
+
+		Member m3 = em.find(Member.class, member3.getId());
+		System.out.println("m3 = " + m3.getClass());
+		Member m3Proxy = em.getReference(Member.class, member3.getId());
+		System.out.println("m3Proxy = " + m3Proxy.getClass());
+
+		// 프록시 객체를 먼저 생성하게 되면 em.find() 메소드를 호출하여도 프록시 객체 사용
+		Member member4 = new Member();
+		member4.setUserName("mem4");
+		em.persist(member4);
+
+		em.flush();
+		em.clear();
+
+		Member m4Ref = em.getReference(Member.class, member4.getId());
+		System.out.println("m4Ref: " + m4Ref.getClass()); // proxy
+
+		Member m4Find = em.find(Member.class, member4.getId());
+		System.out.println("m4Find: " + m4Find.getClass()); // proxy
+
+		System.out.println("m4Ref == m4Find " + (m4Ref.getClass() == m4Find.getClass()));
+
+		// 영속성 컨텍스트의 도움을 받을 수 없는 준영속 상태일 때, 프록시를 초기화하면 문제 발생
+		Member member5 = new Member();
+		member5.setUserName("mem5");
+		em.persist(member5);
+
+		em.flush();
+		em.clear();
+
+		Member m5Ref = em.getReference(Member.class, member5 .getId());
+		System.out.println("m5Ref: " + m5Ref.getClass()); // proxy
+
+//		em.detach(m5Ref);
+//		em.close();
+//		em.clear();
+
+		// 위 명령 호출 시 [LazyInitializationException] could not initialize proxy 이셉션 발생
+		m5Ref.getUserName();
+
+		// 프록시 확인
+		Member member6 = new Member();
+		member6.setUserName("mem6");
+		em.persist(member6);
+
+		em.flush();
+		em.clear();
+
+		Member m6Ref = em.getReference(Member.class, member6 .getId());
+		System.out.println("m6Ref: " + m6Ref.getClass()); // proxy
+
+//		m6Ref.getUserName(); // 초기화 테스트
+//		System.out.println("isLoaded: " + emf.getPersistenceUnitUtil().isLoaded(m6Ref)); // 초기화 여부 확인
+
+		Hibernate.initialize(m6Ref);  // 강제 초기화
+	}
+
+//	private static void printMember(Member findMember) {
+//		String userName = findMember.getUserName();
+//		System.out.println("userName : " + userName);
+//	}
+
+//	private static void printMemberAndTeam(Member findMember) {
+//		String userName = findMember.getUserName();
+//		System.out.println("userName : " + userName);
+//
+//		Team team = findMember.getTeam();
+//		System.out.println("Team : " + team);
+//	}
+
 	private static void mappedSuperclassExample(EntityManager em) {
-		Member member =new Member();
+		Member member = new Member();
 		member.setUserName("user1");
 		member.setCreatedBy("Kim");
 		member.setCreatedDate(LocalDateTime.now());

@@ -3,7 +3,6 @@ package com.jpa.basic.entity;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.OneToOne;
 
 @Entity
 public class Locker {
@@ -14,8 +13,9 @@ public class Locker {
 
 	private String name;
 
-	@OneToOne(mappedBy = "locker")
-	private Member member;
+	// 프록시 예제를 위한 주석
+//	@OneToOne(mappedBy = "locker")
+//	private Member member;
 
 	public Long getId() {
 		return id;
@@ -35,12 +35,12 @@ public class Locker {
 		return this;
 	}
 
-	public Member getMember() {
-		return member;
-	}
-
-	public Locker setMember(Member member) {
-		this.member = member;
-		return this;
-	}
+//	public Member getMember() {
+//		return member;
+//	}
+//
+//	public Locker setMember(Member member) {
+//		this.member = member;
+//		return this;
+//	}
 }
