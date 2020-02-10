@@ -33,8 +33,13 @@ public class Member extends BaseEntity {
 //	private Team team;
 
 	// 일대다 양방향
-	@ManyToOne
-	@JoinColumn(name = "TEAM_ID", insertable = false, updatable = false) // 읽기 전용
+//	@ManyToOne
+//	@JoinColumn(name = "TEAM_ID", insertable = false, updatable = false) // 읽기 전용
+	// 지연로딩
+//	@ManyToOne(fetch = FetchType.LAZY)
+	// 즉시 로딩
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "TEAM_ID")
 	private Team team;
 
 //	private int age;

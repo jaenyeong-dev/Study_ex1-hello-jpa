@@ -40,7 +40,9 @@ public class JpaMain {
 
 //			mappedSuperclassExample(em);
 
-			proxyExample(em, emf);
+//			proxyExample(em, emf);
+
+			lazyLoadingExample(em);
 
 			// 커밋 시점에 insert
 			tx.commit();
@@ -52,6 +54,46 @@ public class JpaMain {
 			em.close();
 		}
 		emf.close();
+
+	}
+
+	private static void lazyLoadingExample(EntityManager em) {
+		Team team1 = new Team();
+		team1.setName("team1");
+		em.persist(team1);
+
+		Team teamB = new Team();
+		teamB.setName("teamB");
+		em.persist(teamB);
+
+		Member member1 = new Member();
+		member1.setUserName("member");
+		member1.setTeam(team1);
+		em.persist(member1);
+
+		Member member2 = new Member();
+		member2.setUserName("member2");
+		member2.setTeam(teamB);
+		em.persist(member2);
+
+		em.flush();
+		em.clear();
+
+		// 지연로딩, 즉시로딩
+//		Member findMember = em.find(Member.class, member.getId());
+//		System.out.println("member getTeam: " + findMember.getTeam().getClass());
+//
+//		System.out.println("-----------------------------");
+//		findMember.getTeam().getName(); // 지연 로딩시 이 시점에 초기화
+//		System.out.println("-----------------------------");
+
+		// JPQL 문제 > 먼저 SQL로 번역되어 member를 디비에서 가져옴 > team이 즉시 로딩인것을 확인 후 team을 바로(별도로) 가져옴
+		// SQL : select * from member;
+		// + SQL : select * from team where team_id = ***;
+//		List<Member> members = em.createQuery("select m from Member m", Member.class).getResultList();
+		// JPQL에서 N+1 문제
+		// fetch join으로 해결
+		List<Member> members = em.createQuery("select m from Member m join fetch m.team", Member.class).getResultList();
 
 	}
 
@@ -131,7 +173,7 @@ public class JpaMain {
 		em.flush();
 		em.clear();
 
-		Member m5Ref = em.getReference(Member.class, member5 .getId());
+		Member m5Ref = em.getReference(Member.class, member5.getId());
 		System.out.println("m5Ref: " + m5Ref.getClass()); // proxy
 
 //		em.detach(m5Ref);
@@ -149,7 +191,7 @@ public class JpaMain {
 		em.flush();
 		em.clear();
 
-		Member m6Ref = em.getReference(Member.class, member6 .getId());
+		Member m6Ref = em.getReference(Member.class, member6.getId());
 		System.out.println("m6Ref: " + m6Ref.getClass()); // proxy
 
 //		m6Ref.getUserName(); // 초기화 테스트

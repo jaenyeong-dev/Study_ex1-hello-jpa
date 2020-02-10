@@ -374,7 +374,21 @@
       * org.hibernate.Hibernate.initialize(entity)
       * JPA 표준은 강제 초기화 없음
 * 즉시 로딩, 지연로딩
+  * FetchType.LAZY 속성으로 지정시 지연 로딩으로 데이터를 프록시 객체로 가져옴 
+    * 프록시 객체안에 필드 등에 접근하거나 사용할 때 초기화됨
+  * FetchType.EAGER 속성으로 지정시 즉시 로딩으로 함께 조회
+  * 가급적 지연 로딩만 사용하길 권장(운영상)
+  * 즉시 로딩 적용시 예상치 못한 SQL 발생 (Join 등으로 인한 성능 저하 등)
+  * 즉시 로딩은 JPQL에서 N+1 문제 발생
+  * @ManyToOne, @OneToOne은 기본값이 즉시 로딩이기 때문에 LAZY로 속성 변경할 것
+  * @OneToMany, @ManyToMany은 기본값이 지연로딩
 * 지연 로딩 활용
+  * Member와 Team은 자주 함께 사용 > 즉시 로딩
+  * Member와 Order는 가끔 함께 사용 > 지연 로딩
+  * Order와 Product는 자주 함께 사용 > 즉시 로딩
+  * 운영상에선 웬만하면 지연 로딩 사용할 것
+  * JPQL fetch join이나, 엔티티 그래프 기능을 사용할 것
+  * 즉시 로딩은 상상하지 못한 쿼리가 실행됨
 * 영속정 전이 CASCADE
 * 고아 객체
 * 영속성 전이 + 고아 객체, 생명주기
