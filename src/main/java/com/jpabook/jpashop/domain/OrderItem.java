@@ -2,6 +2,8 @@ package com.jpabook.jpashop.domain;
 
 import javax.persistence.*;
 
+import static javax.persistence.FetchType.LAZY;
+
 @Entity
 public class OrderItem extends BaseEntity {
 
@@ -14,7 +16,8 @@ public class OrderItem extends BaseEntity {
 //	@Column(name = "ORDER_ID")
 //	private Long orderId;
 
-	@ManyToOne
+//	@ManyToOne
+	@ManyToOne(fetch = LAZY) // 지연 로딩으로 변경 (FetchType을 static import)
 	@JoinColumn(name = "ORDER_ID")
 	private Order order;
 
@@ -22,7 +25,8 @@ public class OrderItem extends BaseEntity {
 //	@Column(name = "ITEM_ID")
 //	private Long itemId;
 
-	@ManyToOne
+//	@ManyToOne
+	@ManyToOne(fetch = LAZY) // 지연 로딩으로 변경 (FetchType을 static import)
 	@JoinColumn(name = "ITEM_ID")
 	private Item item;
 

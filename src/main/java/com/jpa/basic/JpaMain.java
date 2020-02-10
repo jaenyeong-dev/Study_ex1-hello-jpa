@@ -1,7 +1,9 @@
 package com.jpa.basic;
 
 import com.jpa.basic.InheritanceMapping.Movie;
+import com.jpa.basic.entity.Child;
 import com.jpa.basic.entity.Member;
+import com.jpa.basic.entity.Parent;
 import com.jpa.basic.entity.Team;
 import org.hibernate.Hibernate;
 
@@ -42,7 +44,9 @@ public class JpaMain {
 
 //			proxyExample(em, emf);
 
-			lazyLoadingExample(em);
+//			lazyLoadingExample(em);
+
+			transitivePersistenceExample(em);
 
 			// 커밋 시점에 insert
 			tx.commit();
@@ -55,6 +59,30 @@ public class JpaMain {
 		}
 		emf.close();
 
+	}
+
+	private static void transitivePersistenceExample(EntityManager em) {
+		Child child1 = new Child();
+		Child child2 = new Child();
+
+		Parent parent = new Parent();
+		parent.addChild(child1);
+		parent.addChild(child2);
+
+		em.persist(parent);
+		// 영속성 전이 속성 사용시 아래 메소드 호출 안해도 됨
+//		em.persist(child1);
+//		em.persist(child2);
+
+		em.flush();
+		em.clear();
+
+		Parent findParent = em.find(Parent.class, parent.getId());
+		// 고아 객체 제거. orphanRemoval = true 테스트
+		findParent.getChildList().remove(0);
+
+		// cascade = CascadeType.ALL 테스트
+//		em.remove(findParent);
 	}
 
 	private static void lazyLoadingExample(EntityManager em) {

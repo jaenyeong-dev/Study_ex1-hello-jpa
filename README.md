@@ -188,7 +188,7 @@
       * 연관관계 메소드를 생성하여 사용하는 것을 추천
         * 일반적인 setter 메소드보다 새로운 메소드를 생성하여 로직을 처리하는 것을 추천
     * 양방향 매핑 시 무한 루프 주의할 것 (toString(), lombok, JSON 등)
-      * lombok에서 toString 을 빼고 사용할 것
+      * lombok에서 toString()을 빼고 사용할 것
       * JSON 라이브러리 > 컨트롤러에서는 entity를 반환하지 말 것 (무한루프, 엔티티 변경으로 인한 API 변경)
 * 정리
   * 단방향 매핑만으로도 이미 연관관계 매핑 완료
@@ -390,6 +390,40 @@
   * JPQL fetch join이나, 엔티티 그래프 기능을 사용할 것
   * 즉시 로딩은 상상하지 못한 쿼리가 실행됨
 * 영속정 전이 CASCADE
+  * 특정 엔티티를 영속 상태로 만들 때 연관된 엔티티도 함께 영속 상태로 만들고 싶을 때
+  * 예 : 부모 엔티티 저장 시 자식 엔티티도 저장
+  * 주의
+    * 영속성 전이는 연관관계 매핑과 아무 상관 없음
+    * 엔티티를 영속화할 때 연관된 엔티티도 함께 영속화는 편리함을 제공
+  * 종류
+    * ALL : 모두 적용
+    * PERSIST : 영속
+    * REMOVE : 삭제
+    * MERGE : 병합
+    * REFRESH : 갱신
+    * DETACH : 준영속
 * 고아 객체
+  * 고아 객체 제거 : 부모 엔티티와 연관관계가 끊어진 자식 엔티티를 자동으로 삭제
+  * orphanRemoval = true
+  * 자식 엔티티를 컬렉션에서 제거
+    * Parent findParent = em.find(Parent.class, id);
+    * findParent.getChildren().remove(0);
+  * DELETE FROM CHILD WHERE ID = ?
+  * 주의
+    * 참조가 제거된 엔티티는 다른 곳에서 참조하지 않는 고아 객체로 보고 삭제하는 기능
+    * 참조하는 곳이 한곳일 때만 사용할 것
+    * 특정 엔티티가 개인 소유시 사용
+    * @OneToOne, @OneToMany만 사용 가능
+    * 부모를 제거하면 자식은 고아가 됨. 따라서 고아 객체 제거 기능을 활성화하면, 부모 제거시 자식도 함께 제거됨 
+      * CascadeType.REMOVE처럼 동작
+  * CascadeType.ALL + orphanRemoval = true
+    * 스스로 생명주기를 관리하는 엔티티는 em.persist()로 영속화, em.remove()로 제거
+    * 두 옵션을 모두 활성화하면 부모 엔티티를 통해서 자식의 생명주기를 관리할 수 있음
 * 영속성 전이 + 고아 객체, 생명주기
 * 예제 - 연관관계 관리
+  * 글로벌 fetch 전략 설정
+    * 모든 연관관계를 지연 로딩으로
+    * @ManyToOne, @OneToOne은 속성 기본값이 즉시 로딩이므로 지연 로딩으로 변경할 것
+  * 영속성 전이 설정
+    * Order > Delivery을 영속성 전이 ALL 설정
+    * Order > OrderItem을 영속성 전이 ALL 설정

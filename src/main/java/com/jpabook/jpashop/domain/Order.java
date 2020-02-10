@@ -5,6 +5,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import static javax.persistence.CascadeType.*;
+import static javax.persistence.FetchType.LAZY;
+
 @Entity
 @Table(name = "ORDERS")
 public class Order extends BaseEntity {
@@ -19,12 +22,15 @@ public class Order extends BaseEntity {
 //	private Long memberId;
 
 	// 연관관계 매핑
-	@ManyToOne
+//	@ManyToOne
+	// 지연 로딩으로 변경 (FetchType을 static import)
+	// 영속성 전이 설정 (cascade static import)
+	@ManyToOne(fetch = LAZY, cascade = ALL)
 	@JoinColumn(name = "MEMBER_ID")
 	private Member member;
 
 	// Order 안에 OrderItem이 있는 경우는 일반적
-	@OneToMany(mappedBy = "order")
+	@OneToMany(mappedBy = "order", cascade = ALL)
 	private List<OrderItem> orderItems = new ArrayList<>();
 
 	private LocalDateTime orderDate;
@@ -32,7 +38,10 @@ public class Order extends BaseEntity {
 	@Enumerated(EnumType.STRING)
 	private OrderStatus status;
 
-	@OneToOne
+//	@OneToOne
+	// 지연 로딩으로 변경 (FetchType static import)
+	// 영속성 전이 설정 (cascade static import)
+	@OneToOne(fetch = LAZY, cascade = ALL)
 	@JoinColumn(name = "DELIVERY_ID")
 	private Delivery delivery;
 

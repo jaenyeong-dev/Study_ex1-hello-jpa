@@ -1,9 +1,8 @@
 package com.jpabook.jpashop.domain;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.OneToOne;
+import javax.persistence.*;
+
+import static javax.persistence.FetchType.*;
 
 @Entity
 public class Delivery extends BaseEntity {
@@ -18,7 +17,8 @@ public class Delivery extends BaseEntity {
 
 	private DeliveryStatus status;
 
-	@OneToOne(mappedBy = "delivery")
+//	@OneToOne(mappedBy = "delivery")
+	@OneToOne(mappedBy = "delivery", fetch = LAZY) // 지연 로딩으로 변경 (FetchType을 static import)
 	private Order order;
 
 	public Long getId() {
