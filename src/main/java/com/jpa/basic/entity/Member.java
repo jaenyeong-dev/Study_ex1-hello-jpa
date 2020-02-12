@@ -16,7 +16,8 @@ public class Member extends BaseEntity {
 //	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	//	@Column(name = "name", nullable = false)
+	// 컬렴 어노테이션 이름 속성 변경
+//	@Column(name = "name", nullable = false)
 	@Column(name = "USER_NAME", nullable = false)
 	private String userName;
 
@@ -79,6 +80,28 @@ public class Member extends BaseEntity {
 //	private String lastModifiedBy;
 //	private LocalDateTime lastModifiedDate;
 
+	// 기간 Period
+//	private LocalDateTime startDate;
+//	private LocalDateTime endDate;
+	@Embedded
+	private Period workPeriod;
+
+	// 주소 Address
+//	private String city;
+//	private String street;
+//	private String zipcode;
+	@Embedded
+	private Address homeAddress;
+
+	// 주소 객체 중복
+	@Embedded
+	@AttributeOverrides({
+			@AttributeOverride(name = "city", column = @Column(name = "WORK_CITY")),
+			@AttributeOverride(name = "street", column = @Column(name = "WORK_STREET")),
+			@AttributeOverride(name = "zipCode", column = @Column(name = "WORK_ZIPCODE"))
+	})
+	private Address workAddress;
+
 	public Member() {
 	}
 
@@ -138,4 +161,22 @@ public class Member extends BaseEntity {
 //		this.team.getMembers().add(this);
 //		return this;
 //	}
+
+	public Period getWorkPeriod() {
+		return workPeriod;
+	}
+
+	public Member setWorkPeriod(Period workPeriod) {
+		this.workPeriod = workPeriod;
+		return this;
+	}
+
+	public Address getHomeAddress() {
+		return homeAddress;
+	}
+
+	public Member setHomeAddress(Address homeAddress) {
+		this.homeAddress = homeAddress;
+		return this;
+	}
 }

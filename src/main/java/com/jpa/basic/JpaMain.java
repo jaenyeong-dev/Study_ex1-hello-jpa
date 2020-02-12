@@ -1,10 +1,7 @@
 package com.jpa.basic;
 
 import com.jpa.basic.InheritanceMapping.Movie;
-import com.jpa.basic.entity.Child;
-import com.jpa.basic.entity.Member;
-import com.jpa.basic.entity.Parent;
-import com.jpa.basic.entity.Team;
+import com.jpa.basic.entity.*;
 import org.hibernate.Hibernate;
 
 import javax.persistence.EntityManager;
@@ -46,7 +43,9 @@ public class JpaMain {
 
 //			lazyLoadingExample(em);
 
-			transitivePersistenceExample(em);
+//			transitivePersistenceExample(em);
+
+			embeddedExample(em);
 
 			// 커밋 시점에 insert
 			tx.commit();
@@ -59,6 +58,15 @@ public class JpaMain {
 		}
 		emf.close();
 
+	}
+
+	private static void embeddedExample(EntityManager em) {
+		Member member = new Member();
+		member.setUserName("Hello");
+		member.setHomeAddress(new Address("city", "street", "123456"));
+		member.setWorkPeriod(new Period());
+
+		em.persist(member);
 	}
 
 	private static void transitivePersistenceExample(EntityManager em) {
