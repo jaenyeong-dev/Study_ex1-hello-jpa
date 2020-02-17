@@ -1,6 +1,7 @@
 package com.jpa.basic.entity;
 
 import javax.persistence.Embeddable;
+import java.util.Objects;
 
 @Embeddable
 public class Address {
@@ -48,4 +49,22 @@ public class Address {
 //		this.zipCode = zipcode;
 //		return this;
 //	}
+
+	/**
+	 * 값 컬렉션 삭제를 위하여 equals(), hashCode() 메소드 오버라이딩
+	 */
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		Address address = (Address) o;
+		return Objects.equals(city, address.city) &&
+				Objects.equals(street, address.street) &&
+				Objects.equals(zipCode, address.zipCode);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(city, street, zipCode);
+	}
 }

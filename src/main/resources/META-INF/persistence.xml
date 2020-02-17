@@ -21,6 +21,7 @@
         <class>com.jpa.basic.InheritanceMapping.Movie</class>
         <class>com.jpa.basic.entity.Parent</class>
         <class>com.jpa.basic.entity.Child</class>
+        <class>com.jpa.basic.entity.AddressEntity</class>
 
 <!--        <class>com.jpabook.jpashop.domain.Item</class>-->
 <!--        <class>com.jpabook.jpashop.domain.Member</class>-->

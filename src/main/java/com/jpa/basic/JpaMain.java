@@ -10,6 +10,7 @@ import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 public class JpaMain {
 
@@ -49,7 +50,9 @@ public class JpaMain {
 
 //			valueTypeExample(em);
 
-			valueTypeExample2(em);
+//			valueTypeExample2(em);
+
+			valueTypeCollectionExample(em);
 
 			// 커밋 시점에 insert
 			tx.commit();
@@ -62,6 +65,64 @@ public class JpaMain {
 		}
 		emf.close();
 
+	}
+
+	private static void valueTypeCollectionExample(EntityManager em) {
+		Member member = new Member();
+		member.setUserName("member1");
+		member.setHomeAddress(new Address("homeCity", "street", "zipCode"));
+
+		member.getFavoriteFoods().add("치킨");
+		member.getFavoriteFoods().add("족발");
+		member.getFavoriteFoods().add("피자");
+
+		// AddressEntity로 변경하면서 주석처리
+//		member.getAddressHistory().add(new Address("old1", "street1", "zipCode1"));
+//		member.getAddressHistory().add(new Address("old2", "street2", "zipCode2"));
+		member.getAddressHistory().add(new AddressEntity("old1", "street1", "zipCode1"));
+		member.getAddressHistory().add(new AddressEntity("old2", "street2", "zipCode2"));
+
+		em.persist(member);
+
+		em.flush();
+		em.clear();
+
+		// 조회
+		System.out.println("------------------- Start -------------------");
+		Member findMember = em.find(Member.class, member.getId());
+
+		// AddressEntity로 변경하면서 주석처리
+//		List<Address> findMemberAddressHistory = findMember.getAddressHistory();
+//		for (Address address : findMemberAddressHistory) {
+//			System.out.println("ADDRESS : " + address.getCity());
+//		}
+
+		Set<String> favoriteFoods = findMember.getFavoriteFoods();
+		for (String food: favoriteFoods) {
+			System.out.println("favorite Food : " + food);
+		}
+
+		// 수정
+		// HomeCity > newCity
+		// 값 타입은 새 객체(인스턴스) 생성, 삽입하여 수정
+		findMember.setHomeAddress(new Address("newCity", "newStreet", "newZipCode"));
+
+		// 값 타입 컬렉션 수정
+		// 치킨을 > 한식
+		findMember.getFavoriteFoods().remove("치킨");
+		findMember.getFavoriteFoods().add("한식");
+
+		// addressHistory old1을 변경
+		// 값 타입 컬렉션 데이터 변경시 관련된 데이터를 모두 삭제 후 현재 컬렉션의 최종 데이터를 모두 다시 저장함
+		// 위에 생성하여 삽입한 Old2까지 삭제하고 새로 삽입함
+		// AddressEntity로 변경하면서 주석처리
+//		findMember.getAddressHistory().remove(new Address("old1", "street1", "zipCode1"));
+//		findMember.getAddressHistory().add(new Address("new1", "street1", "zipCode1"));
+
+		findMember.getAddressHistory().remove(new AddressEntity("old1", "street1", "zipCode1"));
+		findMember.getAddressHistory().add(new AddressEntity("new1", "street1", "zipCode1"));
+
+		System.out.println("------------------- END -------------------");
 	}
 
 	private static void valueTypeExample2(EntityManager em) {
@@ -169,7 +230,6 @@ public class JpaMain {
 		// JPQL에서 N+1 문제
 		// fetch join으로 해결
 		List<Member> members = em.createQuery("select m from Member m join fetch m.team", Member.class).getResultList();
-
 	}
 
 	private static void proxyExample(EntityManager em, EntityManagerFactory emf) {

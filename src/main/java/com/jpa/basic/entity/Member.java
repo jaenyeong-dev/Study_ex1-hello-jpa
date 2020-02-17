@@ -1,6 +1,12 @@
 package com.jpa.basic.entity;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import static javax.persistence.CascadeType.ALL;
 
 @Entity
 @SequenceGenerator(name = "member_seq_generator", sequenceName = "member_seq", initialValue = 1, allocationSize = 50)
@@ -93,6 +99,27 @@ public class Member extends BaseEntity {
 	@Embedded
 	private Address homeAddress;
 
+	/**
+	 * 값 타입 컬렉션
+	 * private Set<String> favoriteFoods;
+	 * private List<Address> addressHistory;
+	 */
+
+	@ElementCollection // default fetch lazy
+	@CollectionTable(name = "FAVORITE_FOOD", joinColumns = @JoinColumn(name = "MEMBER_ID"))
+	@Column(name = "FOOD_NAME") // String 하나라서 가능 (예외적으로 가능)
+	private Set<String> favoriteFoods = new HashSet<>();
+
+////  @OrderColumn(name = "address_history_order") // 컬렉션 순서 값 컬럼을 사용하여 처리 가능하나 가급적 사용하지 않는 것을 권장
+//	@ElementCollection // default fetch lazy
+//	@CollectionTable(name = "ADDRESS", joinColumns = @JoinColumn(name = "MEMBER_ID"))
+//	private List<Address> addressHistory = new ArrayList<>();
+
+	// 위 방식보다 아래 방식 사용 추천
+	@OneToMany(cascade = ALL, orphanRemoval = true)
+	@JoinColumn(name = "MEMBER_ID")
+	private List<AddressEntity> addressHistory = new ArrayList<>();
+
 	// 주소 객체 중복
 	@Embedded
 	@AttributeOverrides({
@@ -177,6 +204,42 @@ public class Member extends BaseEntity {
 
 	public Member setHomeAddress(Address homeAddress) {
 		this.homeAddress = homeAddress;
+		return this;
+	}
+
+	public Set<String> getFavoriteFoods() {
+		return favoriteFoods;
+	}
+
+	public Member setFavoriteFoods(Set<String> favoriteFoods) {
+		this.favoriteFoods = favoriteFoods;
+		return this;
+	}
+
+//	public List<Address> getAddressHistory() {
+//		return addressHistory;
+//	}
+//
+//	public Member setAddressHistory(List<Address> addressHistory) {
+//		this.addressHistory = addressHistory;
+//		return this;
+//	}
+
+	public List<AddressEntity> getAddressHistory() {
+		return addressHistory;
+	}
+
+	public Member setAddressHistory(List<AddressEntity> addressHistory) {
+		this.addressHistory = addressHistory;
+		return this;
+	}
+
+	public Address getWorkAddress() {
+		return workAddress;
+	}
+
+	public Member setWorkAddress(Address workAddress) {
+		this.workAddress = workAddress;
 		return this;
 	}
 }
