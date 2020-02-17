@@ -45,7 +45,11 @@ public class JpaMain {
 
 //			transitivePersistenceExample(em);
 
-			embeddedExample(em);
+//			embeddedExample(em);
+
+//			valueTypeExample(em);
+
+			valueTypeExample2(em);
 
 			// 커밋 시점에 insert
 			tx.commit();
@@ -58,6 +62,41 @@ public class JpaMain {
 		}
 		emf.close();
 
+	}
+
+	private static void valueTypeExample2(EntityManager em) {
+		Address homeAddress = new Address("city", "street", "10000");
+
+		Member member = new Member();
+		member.setUserName("member1");
+		member.setHomeAddress(homeAddress);
+
+		// 변경하고 싶으면 새로운 객체를 생성하여 삽입할 것 (내부 복사 메소드를 생성하여 사용해도 됨)
+		Address newAddress = new Address("NewCity", homeAddress.getStreet(), homeAddress.getZipCode());
+		member.setHomeAddress(newAddress);
+
+		em.persist(member);
+	}
+
+	private static void valueTypeExample(EntityManager em) {
+		Address homeAddress = new Address("city", "street", "10000");
+
+		Member member1 = new Member();
+		member1.setUserName("member1");
+		member1.setHomeAddress(homeAddress);
+
+		em.persist(member1);
+
+		Address copyAddress = new Address(homeAddress.getCity(), homeAddress.getStreet(), homeAddress.getZipCode());
+
+		Member member2 = new Member();
+		member2.setUserName("member2");
+		member2.setHomeAddress(copyAddress);
+//		member2.setHomeAddress(homeAddress); // 컴파일 레벨에서 걸러낼 방법이 없음
+
+		em.persist(member2);
+
+//		member1.getHomeAddress().setCity("newCity"); // Setter 제거
 	}
 
 	private static void embeddedExample(EntityManager em) {
