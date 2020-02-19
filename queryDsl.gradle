@@ -1,0 +1,49 @@
+// queryDSL을 통해 자동 생성되는 QType의 저장 경로
+def queryDslOutput = hasProperty("querydslGeneratedDir") ? querydslGeneratedDir : "src/main/generated"
+def queryDslOutputDir = file(queryDslOutput)
+
+println displayName + " QueryDsl Generated Q-Type output dir : " + queryDslOutput
+
+sourceSets {
+    main {
+        java {
+            srcDirs += queryDslOutputDir
+        }
+    }
+}
+
+dependencies {
+    implementation group: 'com.mysema.querydsl', name: 'querydsl-jpa', version: '3.6.3'
+    implementation group: 'com.mysema.querydsl', name: 'querydsl-apt', version: '3.6.3'
+
+//    implementation('com.querydsl:querydsl-core')
+//    implementation('com.querydsl:querydsl-apt')
+//    implementation('com.querydsl:querydsl-jpa')
+}
+
+task generateQueryDSL(type: JavaCompile, group: 'build') {
+    doFirst {
+        // 해당 경로 파일 존재하지 않으면 로그 출력
+        if (!queryDslOutputDir.exists()) {
+            logger.info("Creating `$queryDslOutputDir` directory")
+
+            // 디렉토리 생성시 실패하면 예외 발생
+            if (!queryDslOutputDir.mkdirs()) {
+                throw new InvalidUserDataException("Unable to create `$queryDslOutputDir` directory")
+            }
+        }
+    }
+
+    source = sourceSets.main.java
+    classpath = configurations.compile
+    options.compilerArgs = [
+            "-proc:only",
+            "-processor", "com.querydsl.apt.jpa.JPAAnnotationProcessor"
+    ]
+    destinationDir = queryDslOutputDir
+}
+
+// 그래이들 클린시 queryDsl을 통해 자동으로 생성되는 QType의 저장 경로도 삭제
+clean {
+    delete queryDslOutputDir
+}

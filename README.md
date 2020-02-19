@@ -1,10 +1,12 @@
-# Study_ex1-hello-jpa
+# Study_JPA-Basic
 ## 인프런 자바 ORM 표준 JPA 프로그래밍 - 기본편 (김영한)
 * https://www.inflearn.com/course/ORM-JPA-Basic 참조
 
 -----
 
 ### [Settings]
+#### Project Name
+* Study_ex1-hello-jpa
 #### Java
 * zulu jdk 8
 #### gradle
@@ -547,3 +549,185 @@
 * 실전 예제
   * equals(), hashCode() 메소드 생성
     * 메소드 생성시 필드에 직접 접근하지 않고 getter를 사용하여 필드의 접근하게 생성할 것 (프록시일때 계산을 위해서)
+    
+#### 객체지향 쿼리 언어 [기본 문법]
+* JPA가 지원하는 쿼리 방법
+  * JPQL
+    * 가장 단순한 조회 방법
+    * EntityManager.find()
+    * 객체 그래프 탐색(a.getB().getC())
+    * JPA 사용하면 엔티티 객체를 중심으로 개발
+    * 검색 쿼리 등이 문제
+    * 검색을 할 때도 테이블이 아닌 엔티티 객체를 대상으로 검색
+    * 모든 DB 데이터를 객체로 변환해서 검색하는 것은 불가능
+    * 필요한 데이터만 DB에서 불러오려면 검색 조건이 포함된 SQL이 필요
+    * JPA는 SQL을 추상화한 JPQL이라는 객체지향 쿼리 언어를 제공
+    * SQL 문법과 유사 (SELECT, FROM, WHERE, GROUP BY, HAVING, JOIN 등 지원)
+    * JPQL은 엔티티 객체를 대상으로 쿼리함
+    * SQL은 테이블을 대상으로 쿼리함
+    * 테이블이 아닌 객체를 대상으로 실행하는 객체지향 쿼리
+    * SQL을 추상화해서 특정 DB 벤더에 의존하지 않음
+    * JPQL은 객체지향  SQL
+  * JPA Criteria
+    * JPQL 빌더 역할. JPA 공식 기능
+    * JPQL은 String 문자열을 쿼리로 작성하는 것이기 때문에 동적 쿼리를 작성하기 어려움
+    * 자바 코드처럼 코딩(메소드 호출 등)하여 컴파일 레벨에서 오타 등을 잡아줌
+    * 위와 같은 이유로 동적 쿼리 작성(생성)이 쉬움
+    * SQL 같지가 않은 것이 단점
+    * 운영상 거의 사용하지 않음 (가독성이 좋지 않음 - 너무 복잡하고 실용성이 없음)
+    * 대신에 QueryDSL 사용을 권장
+  * QueryDSL (오픈소스 라이브러리)
+    * gradle 설정 실패.. (추후 확인할 것) 
+    * 자바 코드로 JPQL을 작성할 수 있음
+    * JPQL의 빌더 역할
+    * 컴파일 시점에 문법 오류를 찾을 수 있음
+    * 동적 쿼리 작성(생성) 쉬움
+    * 운영상 사용 권장
+    * JPQL을 익힌 후 사용할 것
+  * 네이티브 SQL
+    * JPA가 제공하는 SQL을 직접 사용하는 기능
+    * JPQL로 해결할 수 없는 특정 DB 벤더에 의존적인 기능을 사용할 때
+      * 예 : 오라클 Connect by, 특정 DB 벤더만 사용하는 SQL 힌트 등
+  * JDBC API 직접 사용, MyBatis, SpringJdbcTemplate 함께 사용
+    * 영속성 컨텍스트를 적절한 시점에 강제로 플러시 할 필요가 있음
+      * 예 : JPA를 우회해서 SQL을 실행하기 직전에 영속성 컨텍스트 수동 플러시
+      
+#### JPQL
+* Java Persistence Query Language
+* 객체지향 쿼리 언어 > 테이블이 아닌 엔티티 객체를 대상으로 쿼리
+  * SQL을 추상화해서 특정 DB 벤더 SQL에 의존하지 않음
+* 문법 (select m from Member as m where m.age > 18)
+  * 키워드
+    * SELECT
+    * FROM
+    * WHERE
+    * GROUPBY
+    * HAVING
+    * ORDERBY
+    * UPDATE
+    * DELETE
+  * 엔티티와 속성은 대소문자를 구분함
+  * JPQL 키워드는 대소문자를 구분하지 않음
+  * 엔티티 이름 사용, 테이블명이 아님 (@Entity(name="") 속성을 써야함)
+  * 별칭 필수(m) as는 생략 가능하나 가급적 써줌
+  * 일반적인 집합, 정렬 함수 사용 가능
+  * TypeQuery
+    * 반환 타입이 명확할 때 사용
+  * Query
+    * 반환 타입이 명확하지 않을 때 사용
+  * 결과 조회 API
+    * query.getResult() : 결과가 하나 이상(리스트) 반환 (결과가 없으면 빈 리스트 반환)
+    * query.getSingleResult() : 결과가 정확히 한개일 때 단일 객체 반환
+      * 결과가 없으면 javax.persistence.NoResultException
+      * 결과가 둘 이상이면 javax.persistence.NonUniqueResultException
+  * 파라미터 바인딩
+    * 이름 기준
+    * 위치 기준 : 변경될 가능성때문에 가급적 사용하지 말 것
+* 프로젝션
+  * SELECT 절에 조회할 대상을 지정하는 것
+    * 엔티티
+      * SELECT m FROM Member m
+      * SELECT m.team FROM Member m
+    * 임베디드
+      * SELECT m.address FROM Member m
+    * 스칼라 타입(숫자, 문자 등 기본 데이터 타입)
+      * SELECT m.userName, m.age FROM Member m
+    * DISTINCT로 중복 제거
+  * 여러 값 조회
+    * Query 타입으로 조회
+    * Query[] 타입으로 조회
+    * new 명령어로 조회
+      * 단순 값을 DTO로 바로 조회
+      * SELECT new jpabook.jpql.UserDTO(m.userName, m.age) FROM Member m
+      * 패키지명을 포함한 전체 클래스명 입력
+      * 순서, 타입이 일치하는 생성자 필요
+* 페이징 API (아래 두 API로 추상화)
+  * setFirstResult(int startPosition) : 조회 시작 위치(0부터 시작)
+  * setMaxResult(int maxResult) : 조회할 데이터 수
+* 조인
+  * 내부 조인
+    * SELECT m FROM Member m [INNER] JOIN m.team t
+  * 외부 조인
+    * SELECT m FROM Member m LEFT [OUTER] JOIN m.team t
+  * 세타 조인
+    * SELECT count(m) FROM Member m, Team t where m.userName = t.name
+  * ON 절 (JPA 2.1부터 지원)
+    * 조인대상 필터링
+      * JPQL : SELECT m, t FROM Member m LEFT JOIN m.team t ON t.name = 'A'
+      * SQL : SELECT m.\*, t.\* FROM Member m LEFT JOIN TEAM t ON m.TEAM_ID = t.ID AND t.NAME = 'A'
+    * 연관관계 없는 엔티티 외부 조인(하이버네이트 5.1부터 지원)
+      * JPQL : SELECT m, t FROM Member m LEFT JOIN Team t ON m.userName = t.name
+      * SQL : SELECT m.\*, t.\* FROM Member m LEFT JOIN TEAM t ON m.USER_NAME = t.NAME
+* 서브 쿼리
+  * 나이가 평균보다 많은 회원
+    * SELECT m FROM Member m WHERE m.age > (SELECT avg(m2.age) FROM Member m2)
+  * 한 건이라도 주문한 고객
+    * SELECT m FROM Member m WHERE (SELECT COUNT(o) FROM Order o WHERE m = o.member) > 0
+  * 지원 함수
+    * [NOT] EXISTS (subquery) : 서브쿼리에 결과가 존재하면 참
+      * {ALL | ANY | SOME} (subquery)
+      * ALL 모두 만족하면 참
+      * ANY, SOME : 같은 의미, 조건을 하나라도 만족하면 참
+    * [NOT] IN (subquery) : 서브쿼리의 결과 중 하나라도 같은 것이 있으면 참
+  * 예제
+    * 팀 A 소속인 회원
+      * SELECT m FROM Member m WHERE EXISTS (SELECT t FROM m.team WHERE t.name = '팀A')
+    * 전체 상품 각각의 재고보다 주문량이 많은 주문
+      * SELECT o FROM Order o WHERE o.orderAmount > ALL (SELECT p.stockAmount FROM Product p)
+    * 어떤 팀이든 팀에 소속된 회원
+      * SELECT m FROM Member m WHERE EXISTS (SELECT t FROM m.team WHERE t.name = '팀A')
+  * 한계
+    * JPA는 WHERE, HAVING 절에서만 서브 쿼리 사용 가능
+    * SELECT 절 또한 가능(하이버네이트에서 지원)
+    * FROM 절 서브쿼리는 현재 JPQL에서 사용 불가능
+      * 조인으로 풀 수 있으면 풀어서 해결할 것
+* JPQL 타입 표현
+  * 문자 : 'HELLO', 'She'
+  * 숫자 : 10L (Long), 10D (Double), 10F (Float)
+  * Boolean : TRUE, FALSE
+  * ENUM : com.jpabook.jpashop.domain.OrderStatus (패키지명 포함)
+  * entity type : TYPE(m) = Member (상속 관계에서 사용)
+  * 기타
+    * SQL과 문법이 같은 식
+    * EXISTS, IN
+    * AND, OR, NOT
+    * =, >, >=, <, <=, <>
+    * BETWEEN, LIKE, IS NULL
+* 조건식 - CASE
+  * 기본 CASE
+    * SELECT  
+        CASE WHEN m.age <= 10 THEN '학생요금'  
+             WHEN m.age >= 60 THEN '경로요금'  
+             ELSE '일반요금'  
+        END  
+       FROM Member m
+  * 단순 CASE
+    * SELECT  
+        CASE t.name
+             WHEN '팀A' THEN '인센티브110%'  
+             WHEN '팀B' THEN '인센티브120%'  
+             ELSE '인센티브105%'  
+        END  
+       FROM Team t
+  * COALESCE : 하나씩 조회해서 NULL이 아니면 반환
+    * SELECT COALESCE(m.userName, '이름 없는 회원') FROM Member m
+    * 사용자 이름이 없으면 '이름 없는 회원'을 반환
+  * NULLIF : 두 값이 같으면 NULL 반환, 다르면 첫번째 값 반환
+    * SELECT NULLIF(m.userName, '관리자') FROM Member m
+    * 사용자 이름이 '관리자'면 NULL을 반환하고 나머지는 본인의 이름을 반환
+* 기본함수 (JPQL이 제공하는 표준 함수)
+  * CONCAT
+  * SUBSTRING
+  * TRIM
+  * LOWER, UPPER
+  * LENGTH
+  * LOCATE
+  * ABS, SQRT, MOD
+  * SIZE : 컬렉션의 크기를 돌려주는 함수, INDEX(JPA 용도)
+* 사용자 정의 함수
+  * 하이버네이트는 사용전 방언에 추가해야 함
+    * 사용하는 DB 방언을 상속 받고, 사용자 정의 함수를 등록
+    * SELECT FUNCTION('group_concat', i.name) FROM Item i
+    * Dialect를 생성 (com.jpql.dialect.MyH2Dialect)
+
+#### 객체지향 쿼리 언어 [중급 문법]

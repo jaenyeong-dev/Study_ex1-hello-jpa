@@ -8,6 +8,9 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -52,7 +55,15 @@ public class JpaMain {
 
 //			valueTypeExample2(em);
 
-			valueTypeCollectionExample(em);
+//			valueTypeCollectionExample(em);
+
+//			jpqlBasicExample(em);
+
+//			criteriaExample(em);
+
+//			queryDslExample(em);
+
+			nativeQueryExample(em);
 
 			// 커밋 시점에 insert
 			tx.commit();
@@ -64,7 +75,59 @@ public class JpaMain {
 			em.close();
 		}
 		emf.close();
+	}
 
+	private static void nativeQueryExample(EntityManager em) {
+		Member member = new Member();
+		member.setUserName("member");
+		em.persist(member);
+
+		// JPA를 우회해서 SQL 실행 직전에 영속성 컨텍스트 수동 플러시
+		// flush > commit, execute query
+		em.flush();
+
+		List<Member> resultList =
+				em.createNativeQuery(
+						"SELECT MEMBER_ID, CITY, STREET, ZIPCODE, USER_NAME " + " FROM MEMBER",
+						Member.class)
+						.getResultList();
+
+		for (Member findMember : resultList) {
+			System.out.println("member = " + findMember);
+		}
+	}
+
+	private static void queryDslExample(EntityManager em) {
+//		QMember m = Qmember.member;
+//		List<Member> memberResult = queryFactory.select(m).from(m).where(m.name.like("kim")).fetch();
+	}
+
+	private static void criteriaExample(EntityManager em) {
+
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<Member> query = cb.createQuery(Member.class);
+
+		Root<Member> m = query.from(Member.class);
+
+		CriteriaQuery<Member> cq = query.select(m);
+
+		// 동적 쿼리 생성하기 용이함
+		String testUserName = "AA";
+		if (testUserName != null) {
+			cq = cq.where(cb.equal(m.get("userName"), "kim"));
+		}
+
+		em.createQuery(cq).getResultList();
+	}
+
+	private static void jpqlBasicExample(EntityManager em) {
+		List<Member> queryResult = em.createQuery("select m " +
+				"from Member m " +
+				"where m.userName like '%kim%'", Member.class).getResultList();
+
+		for (Member member : queryResult) {
+			System.out.println("member = " + member);
+		}
 	}
 
 	private static void valueTypeCollectionExample(EntityManager em) {
@@ -98,7 +161,7 @@ public class JpaMain {
 //		}
 
 		Set<String> favoriteFoods = findMember.getFavoriteFoods();
-		for (String food: favoriteFoods) {
+		for (String food : favoriteFoods) {
 			System.out.println("favorite Food : " + food);
 		}
 

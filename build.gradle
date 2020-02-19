@@ -3,6 +3,10 @@ plugins {
     id 'war'
 }
 
+// plugins {} 블록 위에 작성시 에러
+//apply from: "$rootProject.projectDir/queryDsl.gradle"
+//compileJava.dependsOn(generateQueryDSL)
+
 group 'com.jpa-basic'
 version '1.0.0'
 
