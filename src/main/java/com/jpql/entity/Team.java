@@ -13,6 +13,7 @@ public class Team {
 
 	private String name;
 
+//	@BatchSize(size = 100) // FETCH JOIN을 사용하지 않고 Team을 SELECT 한 쿼리에서 페이징 처리시 태깅
 	@OneToMany(mappedBy = "team")
 //	@OrderColumn
 	private List<Member> members = new ArrayList<>();

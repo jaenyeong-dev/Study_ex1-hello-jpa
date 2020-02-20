@@ -594,7 +594,7 @@
       
 #### JPQL
 * Java Persistence Query Language
-* 객체지향 쿼리 언어 > 테이블이 아닌 엔티티 객체를 대상으로 쿼리
+* 객체지향 쿼리 언어 > 테이블이 아닌 엔티티 객체를 대상으로 쿼리 (처음에 영속성 컨텍스트에서 가져옴)
   * SQL을 추상화해서 특정 DB 벤더 SQL에 의존하지 않음
 * 문법 (select m from Member as m where m.age > 18)
   * 키워드
@@ -731,3 +731,143 @@
     * Dialect를 생성 (com.jpql.dialect.MyH2Dialect)
 
 #### 객체지향 쿼리 언어 [중급 문법]
+* JPQL 경로 표현식
+  * 점을 찍어 객체 그래프를 탐색하는 것
+    * SELECT m.userName > 상태 필드  
+        FROM Member m  
+        JOIN m.team t > 단일 값 연관 필드  
+        join m.orders o > 컬렉션 값 연관 필드  
+       WHERE t.name = '팀A'
+  * 용어 정리
+    * 상태 필드(state field) : 단순히 값을 저장하기 위한 필드 (예 : m.userName)
+    * 연관 필드(association field) : 연관관계를 위한 필드
+      * 단일 값 연관 필드 : @ManyToOne, @OneToOne, 대상이 엔티티(예 : m.team)
+      * 컬렉션 값 연관 필드 : @OneToMany, @ManyToMany, 대상이 컬렉션(예 : m.orders)
+  * 특징
+    * 상태 필드 : 경로 탐색의 끝, 탐색이 안됨
+    * 단일 값 연관 경로 : 묵시적 내부 조인 발생, 탐색 안됨
+    * 컬렉션 값 연관 경로 : 묵시적 내부 조인 발생, 탐색 안됨
+      * FROM 절에서 명시적 조인을 통해 별칭을 얻으면 그 별칭을 통해서 탐색 가능
+    * 묵시적 조인이 발생하게 설계를 하거나 쿼리를 사용하지 않는 것을 권장(튜닝하기 어려움)
+* 조인
+  * 명시적 조인 : JOIN 키워드 직접 사용 (outer join 사용하려면 명시적 조인을 사용)
+    * SELECT m FROM Member m JOIN m.team t
+  * 묵시적 조인 : 경로 표현식에 의해 묵시적으로 SQL 조인 발생 (inner join만 가능)
+    * SELECT m.team FROM Member m
+* 예제
+  * SELECT o.member.team FROM Order o (성공)
+  * SELECT t.members FROM Team (성공)
+  * SELECT t.members.userName FROM Team t (실패)
+  * SELECT m.username FROM Team t join t.members m (성공)
+* 경로 탐색을 사용한 묵시적 조인시 주의사항
+  * 항상 내부 조인
+  * 컬렉션은 경로 탐색의 끝, 명시적 조인을 통해 별칭을 얻어야함
+  * 경로 탐색은 SELECT, WHERE 절에서만 사용하지만 묵시적 조인으로 인해 SQL의 FROM(JOIN) 절에 영향을 줌
+* 운영
+  * 가급적 묵시적 조인보다 명시적 조인 사용
+  * 조인은 SQL 튜닝에 중요한 포인트
+  * 묵시적 조인은 일어나는 상황을 한눈에 파악(확인)하기 어려움
+* fetch join
+  * 운영상 매우 중요함
+  * fetch join이란
+    * SQL 조인 종류가 아님
+    * JPQL에서 성능 최적화를 위해 제공하는 기능
+    * 연관된 엔티티 컬렉션을 SQL 한 번에 함께 조회하는 기능
+    * join fetch 명령어를 사용
+    * 페치 조인 ::= [LEFT [OUTER] | INNER] JOIN FETCH 조인 경로
+  * 엔티티 페치 조인
+    * 회원을 조회하면서 연관된 팀도 함께 조회(SQL 한 번에)
+      * Member와 Team을 함께 SELECT 해옴
+    * JPQL : SELECT m FROM Member m join fetch m.team
+    * SQL : SELECT M.\*, T.\* FROM MEMBER M INNER JOIN TEAM T ON M.TEAM_ID=T.ID
+  * 컬렉션 페치 조인
+    * 일대다 관계
+    * JPQL : SELECT t FROM Team JOIN FETCH t.members WHERE t.name = '팀A'
+    * SQL : SELECT T.\*, M.\* FROM TEAM T INNER JOIN MEMBER M ON T.ID = M.TEAM_ID WHERE T.NAME = '팀A'
+  * DISTINCT
+    * SQL의 DISTINCT는 중복된 결과를 제거하는 명령
+    * JPQL의 DISTINCT 2가지 기능 제공
+      * SQL의 DISTINCT 추가
+      * 앱에서 엔티티 중복 제거
+    * 일대다는 중복이 나올 수 있으나 (개수가 여러개 나옴) 다대일은 중복 없음
+  * 페치 조인과 일반 조인의 차이
+    * 일반 조인 실행시 연관 엔티티를 함께 조회하지 않음
+    * JPQL : SELECT t FROM Team t JOIN t.members m WHERE t.name = '팀A'
+    * SQL : SELECT T.\* FROM TEAM T INNER JOIN MEMBER M ON T.ID = M.TEAM_ID WHERE T.NAME = '팀A'
+    * JPQL은 결과를 반환할 때 연관관계 고려하지 않음
+    * 단지 SELECT 절에 지정한 엔티티만 조회할 뿐
+    * 여기 일반 조인 예제에서는 팀 엔티티만 조회, 회원 엔티티는 조회하지 않음
+    * 페치 조인을 사용할 때만 연관된 엔티티도 함께 조회(즉시로딩)됨
+    * 페치 조인은 객체 그래프를 SQL 한 번에 조회하는 개념
+  * 특징과 한계
+    * 특징
+      * 연관된 엔티티들을 SQL 한 번으로 조회 (성능 최적화)
+      * 엔티티에 직접 적용하는 글로벌 로딩 전략보다 우선
+        * @OneToMany(fetch = FetchType.LAZY) // 글로벌 로딩 전략
+      * 운영(실무)에서 글로벌 로딩 전략은 모두 지연 로딩
+      * 최적화가 필요한 곳은 페치 조인 적용
+    * 한계
+      * 페치 조인 대상에는 별칭을 줄 수 없음 (하이버네이트는 가능하나 가급적 사용을 권장하지 않음)
+        * 예 : SELECT t FROM Team t JOIN FETCH t.members as m WHERE m.age > 10
+        * 특정 조건들을 걸러내는건 JPA 설계 의도(객체 그래프 설계)와 맞지 않음 
+        * FETCH JOIN은 기본적으로 연관된 모든 것들을 가져오게 설계되어 있기 때문에 가급적이면 별칭을 주어 조건을 걸러 내어 사용하지 말 것
+      * 둘 이상의 컬렉션은 페치 조인할 수 없음
+        * 다대다로 되어 (곱하기) 데이터가 너무 많거나 정합성이 안맞을 수 있음 (할 수 있어도 하지 말것)
+      * 컬렉션을 페치 조인하면 페이징 API를 사용할 수 없음 (setFirstResult, setMaxResult)
+        * 일대일, 다대일 같은 단일 값 연관 필드들은 페치 조인해도 페이징 가능
+        * 하이버네이트는 경고 로그를 남기고 메모리에서 페이징 (매우 위험)
+        * 예 : Team에 Member가 2명인데 페이징을 1로 설정했을 때 Member 데이터를 1개만 가져와 문제 발생함
+      * SELECT t FROM Team t 쿼리로 fetch join을 하지 않고 사용
+        * Team 클래스에 List<Member> members 필드에 @BatchSize(size = 100) 어노테이션 태깅
+      * 쿼리를 직접 작성하여 DTO로 출력
+  * 정리
+    * 모든 것을 페치 조인으로 해결할 수 없음
+    * 페치 조인은 객체 그래프를 유지할 때 사용하면 효과적
+    * 여러 테이블을 조인해서 엔티티가 가진 모양이 아닌 전혀 다른 결과를 내야 하면,  
+      페치 조인보다는 일반 조인을 사용하고 필요한 데이터들만 조회해서 DTO로 반환하는 것이 효과적
+* 다형성 쿼리
+  * 조회 대상을 특정 자식 타입으로 한정 지을 수 있음
+    * 예 : Item 중에 Book, Movie를 조회
+    * JPQL : SELECT i FROM Item i WHERE type(i) IN (Book, Movie)
+    * SQL : SELECT I.\* FROM ITEM I WHERE I.DTYPE IN ('B', 'M')
+  * TREAT(JPA 2.1)
+    * 자바의 타입 캐스팅과 유사함
+    * 상속 구조에서 부모 타입을 특정 자식 타입으로 다룰 때 사용함
+    * FROM, WHERE, SELECT(하이버네이트 지원) 사용
+    * 예 : 부모인 Item과 자식 Book이 있음
+    * JPQL : SELECT i FROM Item i WHERE TREAT(i as Book).author = 'kim'
+    * SQL : SELECT I.\* FROM ITEM I WHERE I.DTYPE = 'B' and I.auther = 'kim' (싱글 테이블 전략인 경우)
+* 엔티티 직접 사용
+  * 기본키 값
+    * JPQL에서 엔티티를 직접 사용하면 SQL에서 해당 엔티티의 기본키 값을 사용
+    * JPQL : 
+      * SELECT COUNT(m.id) FROM Member m // 엔티티의 아이디를 사용
+      * SELECT COUNT(m) FROM Member m // 엔티티를 직접 사용
+    * SQL : SELECT COUNT(M.ID) as cnt FROM MEMBER M // JPQL 둘다 같은 SQL 실행됨
+  * 외래키 값
+    * 마찬가지
+* Named 쿼리
+  * 정적 쿼리만 가능 (동적 쿼리는 불가능하지만 파라미터 바인딩 쿼리로 작성 가능)
+    * 미리 정의해서 이름을 부여한 후 사용하는 JPQL
+    * 어노테이션 또는 XML에 정의
+    * 앱 로딩 시점에 초기화 후 재사용 (정적 쿼리라 변하지 않음 > SQL로 파싱하여 미리 캐싱처리)
+    * 앱 로딩 시점에 쿼리를 검증
+  * 환경 설정
+    * XML이 우선권을 가짐
+    * 앱 운영 환경에 따라 다른 XML을 배포할 수 있음
+* 벌크 연산 (UPDATE, DELETE - 특정 조건 1개 데이터가 아닌 경우)
+  * 재고가 10개 미만인 모든 상품의 가격을 10% 상승 하려면?
+  * JPA 변경 감지 기능으로 실행하려면 너무 많은 SQL 실행
+    * (1) 재고가 10개 미만인 상품을 리스트로 조회
+    * (2) 상품 엔티티의 가격을 10% 증가
+    * (3) 트랜잭션 커밋 시점에 변경 감지 동작
+  * 변경된 데이터가 100건이라면 100번의 UPDATE SQL이 실행됨
+  * 예제
+    * 쿼리 한 번으로 여러 테이블 로우 변경(엔티티)
+    * executeUpdate()의 결과는 영향받은 엔티티 수 반환
+    * UPDATE, DELETE 지원
+    * INSERT(INSERT INTO .. SELECT, 하이버네이트 지원)
+  * 주의
+    * 벌크 연산은 영속성 컨텍스트를 무시하고 DB에 직접 쿼리 실행
+      * 벌크 연산 먼저 실행
+      * 벌크 연산 수행 후 영속성 컨텍스트 초기화

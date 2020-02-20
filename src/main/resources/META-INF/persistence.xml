@@ -6,8 +6,8 @@
 
 <!--    <persistence-unit name="jpaBasic">-->
 <!--    <persistence-unit name="jpaShop">-->
-    <persistence-unit name="jpqlBasic">
-
+    <persistence-unit name="jpql">
+        <mapping-file>META-INF/ormMember.xml</mapping-file>
         <!-- 클래스 인식 못할 경우 -->
         <!-- 상위 추상 클래스는 포함하지 않아도 정상 작동 -->
 
@@ -85,6 +85,8 @@
 <!--            <property name="hibernate.jdbc.batch_size" value="10"/>-->
             <!-- 운영에선 사용하지 말 것 -->
             <property name="hibernate.hbm2ddl.auto" value="create"/>
+            <!-- batchSize -->
+            <property name="hibernate.default_batch_size" value="100"/>
         </properties>
     </persistence-unit>
 </persistence>

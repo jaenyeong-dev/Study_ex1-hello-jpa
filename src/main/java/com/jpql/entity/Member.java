@@ -3,6 +3,10 @@ package com.jpql.entity;
 import javax.persistence.*;
 
 @Entity
+//@NamedQuery(
+//		name = "Member.findByUserName",  // 쿼리명 관례는 엔티티.쿼리명
+//		query = "SELECT m FROM Member m WHERE m.userName = :userName"  // 실행 시점에 쿼리 무결성 체크
+//) // META-INF/ormMember.xml 파일에 설정을 해도 사용 가능
 public class Member {
 
 	@Id

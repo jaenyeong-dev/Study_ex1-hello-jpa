@@ -8,13 +8,14 @@ import com.jpql.entity.Team;
 import com.jpql.entity.entityType.Item;
 
 import javax.persistence.*;
+import java.util.Collection;
 import java.util.List;
 
 public class JpqlMain {
 
 	public static void main(String[] args) {
 		// Name은 persistence.xml에 persistence-unit 태그의 이름 속성값을 줌
-		EntityManagerFactory emf = Persistence.createEntityManagerFactory("jpqlBasic");
+		EntityManagerFactory emf = Persistence.createEntityManagerFactory("jpql");
 
 		EntityManager em = emf.createEntityManager();
 		EntityTransaction tx = em.getTransaction();
@@ -39,7 +40,17 @@ public class JpqlMain {
 
 //			caseExpressionExample(em);
 
-			functionExample(em);
+//			functionExample(em);
+
+//			pathExpressionExample(em);
+
+//			fetchJoinExample(em);
+
+//			useEntityDirectlyExample(em);
+
+//			nameQueryExample(em);
+
+			bulkExample(em);
 
 			tx.commit();
 		} catch (Exception e) {
@@ -50,6 +61,329 @@ public class JpqlMain {
 			em.close();
 		}
 		emf.close();
+	}
+
+	private static void bulkExample(EntityManager em) {
+
+		Member member1 = new Member();
+		member1.setUserName("멤버1");
+		member1.setAge(11);
+		em.persist(member1);
+
+		Member member2 = new Member();
+		member2.setUserName("멤버2");
+		member2.setAge(12);
+		em.persist(member2);
+
+		Member member3 = new Member();
+		member3.setUserName("멤버3");
+		member3.setAge(13);
+		em.persist(member3);
+
+		// 벌크연산
+		// 수정, 삭제 다 가능
+		// 실행 전 flush는 됨 (FLUSH는 자동 호출)
+		String queryStr = "UPDATE Member m SET m.age = 20";
+		int updateCnt = em.createQuery(queryStr).executeUpdate();
+		System.out.println("UPDATE Count = " + updateCnt);
+
+		// 영속성 컨텍스트는 갱신되지 않음
+		System.out.println("Before member 1 = " + member1);
+		System.out.println("Before member 2 = " + member2);
+		System.out.println("Before member 3 = " + member3);
+
+		// 기존 Member 인스턴스들을 사용하면 안됨
+		// 벌크 연산 후 영속성 컨텍스트 초기화 후 다시 가져와야 함
+		em.clear();
+
+		Member findMember1 = em.find(Member.class, member1.getId());
+		Member findMember2 = em.find(Member.class, member2.getId());
+		Member findMember3 = em.find(Member.class, member3.getId());
+
+		System.out.println("After member 1 = " + findMember1);
+		System.out.println("After member 2 = " + findMember2);
+		System.out.println("After member 3 = " + findMember3);
+	}
+
+	private static void nameQueryExample(EntityManager em) {
+
+		Member member1 = new Member();
+		member1.setUserName("멤버1");
+		em.persist(member1);
+
+		List<Member> memberList = em.createNamedQuery("Member.findByUserName", Member.class)
+				.setParameter("userName", "멤버1")
+				.getResultList();
+		for (Member member : memberList) {
+			System.out.println("member : " + member);
+		}
+	}
+
+	private static void useEntityDirectlyExample(EntityManager em) {
+
+		Team teamA = new Team();
+		teamA.setName("teamA");
+		em.persist(teamA);
+
+		Member member1 = new Member();
+		member1.setUserName("회원1");
+		member1.setTeam(teamA);
+		em.persist(member1);
+
+		em.flush();
+		em.clear();
+
+		// 엔티티를 직접 사용할 때 (기본키)
+		String useEntityPKDirectlyQuery = "SELECT m FROM Member m WHERE m = :member";
+		Member findMember1 = em.createQuery(useEntityPKDirectlyQuery, Member.class)
+				.setParameter("member", member1)
+				.getSingleResult();
+
+		System.out.println("findMember1 = " + findMember1);
+
+		em.flush();
+		em.clear();
+
+		// 엔티티의 ID를 사용할 때 (기본키)
+		String useEntityPKQuery = "SELECT m FROM Member m WHERE m.id = :memberId";
+		Member findMember2 = em.createQuery(useEntityPKQuery, Member.class)
+				.setParameter("memberId", member1.getId())
+				.getSingleResult();
+		System.out.println("findMember2 = " + findMember2);
+
+		em.flush();
+		em.clear();
+
+		// 엔티티를 직접 사용할 때 (외래키)
+		String useEntityFKDirectlyQuery = "SELECT m FROM Member m WHERE m.team = :team";
+		Member findMember3 = em.createQuery(useEntityFKDirectlyQuery, Member.class)
+				.setParameter("team", teamA)
+				.getSingleResult();
+		System.out.println("findMember3 = " + findMember3);
+
+		em.flush();
+		em.clear();
+
+		// 엔티티의 ID를 사용할 때 (외래키)
+		String useEntityFKQuery = "SELECT m FROM Member m WHERE m.team.id = :teamId";
+		Member findMember4 = em.createQuery(useEntityFKQuery, Member.class)
+				.setParameter("teamId", teamA.getId())
+				.getSingleResult();
+		System.out.println("findMember4 = " + findMember4);
+	}
+
+	private static void fetchJoinExample(EntityManager em) {
+
+		Team teamA = new Team();
+		teamA.setName("teamA");
+		em.persist(teamA);
+
+		Member member1 = new Member();
+		member1.setUserName("회원1");
+		member1.setTeam(teamA);
+		em.persist(member1);
+
+		Member member2 = new Member();
+		member2.setUserName("회원2");
+		member2.setTeam(teamA);
+		em.persist(member2);
+
+		Team teamB = new Team();
+		teamB.setName("teamB");
+		em.persist(teamB);
+
+		Member member3 = new Member();
+		member3.setUserName("회원3");
+		member3.setTeam(teamB);
+		em.persist(member3);
+
+		em.flush();
+		em.clear();
+
+		// ENTITY JOIN
+		String query = "SELECT m FROM Member m";
+		List<Member> resultList1 = em.createQuery(query, Member.class).getResultList();
+
+		for (Member member : resultList1) {
+			System.out.println("Entity Loop1 member = " + member.getUserName() + ", team = " + member.getTeam().getName());
+			// 멤버1 : 첫 루프를 돌면서 쿼리를 사용하여 TeamA를 가져옴 (영속성 컨텍스트에 없기 때문에)
+			// 멤버2 : TeamA를 영속성 컨텍스트(1차캐시)에서 가져옴
+			// 멤버3 : 쿼리를 사용하여 TeamB를 가져옴 (마찬가지로 영속성 컨텍스트에 없기 때문에)
+
+			// 만약 회원이 100명이라면 쿼리를 100번 실행함 (최악의 경우에 팀이 다 다를 경우)
+			// N + 1 : (Team) + (Member)
+		}
+
+		em.flush();
+		em.clear();
+
+		// ENTITY JOIN FETCH
+		String entityFetchJoinQuery = "SELECT m FROM Member m JOIN FETCH m.team";
+//		String entityFetchJoinQuery = "SELECT m FROM Member m LEFT JOIN FETCH m.team";
+		List<Member> resultList2 = em.createQuery(entityFetchJoinQuery, Member.class).getResultList();
+
+		for (Member member : resultList2) {
+			// 조인해서 Team 데이터도 함께 가져오기 때문에 영속성 컨텍스트에 다 있음 (team은 프록시가 아님)
+			System.out.println("Entity Loop2 member = " + member.getUserName() + ", team = " + member.getTeam().getName());
+		}
+
+		em.flush();
+		em.clear();
+
+		// COLLECTION JOIN FETCH
+		String collectionFetchJoinQuery = "SELECT t FROM Team t JOIN FETCH t.members";
+		List<Team> resultList3 = em.createQuery(collectionFetchJoinQuery, Team.class).getResultList();
+
+		for (Team team : resultList3) {
+			// 콘솔 출력 결과
+			// teamA 중복 출력 (조인으로 인해서)
+//			Collection Loop1 team = teamA, members size = 2  // TEAM A - MEMBER 1
+//			Collection Loop1 team = teamA, members size = 2  // TEAM A - MEMBER 2
+//			Collection Loop1 team = teamB, members size = 1  // TEAM B - MEMBER 3
+			System.out.println("Collection Loop1 team = " + team.getName() + ", members size = " + team.getMembers().size());
+
+			// 멤버 확인
+			for (Member member : team.getMembers()) {
+				System.out.println("Members -> " + member);
+			}
+		}
+
+		em.flush();
+		em.clear();
+
+		// DISTINCT
+		// size 2
+		String noDistinctQuery1 = "SELECT t FROM Team t";
+		List<Team> noDistinctList1 = em.createQuery(noDistinctQuery1, Team.class).getResultList();
+		System.out.println("noDistinctList1 size : " + noDistinctList1.size()); // noDistinctList1.size() = 3
+
+		// size 3
+		String noDistinctQuery2 = "SELECT t FROM Team t JOIN FETCH t.members";
+		List<Team> noDistinctList2 = em.createQuery(noDistinctQuery2, Team.class).getResultList();
+		System.out.println("noDistinctList2 size : " + noDistinctList2.size()); // noDistinctList2.size() = 3
+
+		// distinct query
+		// 현재 예제는 SQL 쿼리만으론 Distinct가 의미가 없음
+		// Distinct를 추가하면 JPA가 앱에서 중복 제거 시도
+		// 같은 식별자를 가진 Team 엔티티 제거
+		String distinctFetchJoinQuery = "SELECT DISTINCT t FROM Team t JOIN FETCH t.members"; // resultList4.size() = 3
+		List<Team> distinctList = em.createQuery(distinctFetchJoinQuery, Team.class).getResultList();
+
+		System.out.println("distinctList size : " + distinctList.size());
+
+		for (Team team : distinctList) {
+			System.out.println("distinct team = " + team.getName() + ", members size = " + team.getMembers().size());
+		}
+
+		em.flush();
+		em.clear();
+
+		// 일반 조인
+		// members가 지연로딩
+		// 여기서는 팀 엔티티만 조회, 회원 엔티티는 조회하지 않음
+		String basicJoinQuery = "SELECT t FROM Team t JOIN t.members m";
+		List<Team> basicJoinList = em.createQuery(basicJoinQuery, Team.class).getResultList();
+
+		em.flush();
+		em.clear();
+
+		// 페이징
+		String unrighteousQuery = "SELECT t FROM Team t JOIN FETCH t.members m"; // 올바르지 않은 쿼리
+
+		// 뒤집어서 Member로 시작하여 페이징
+		String rightQuery = "SELECT m FROM Member m JOIN FETCH m.team t";
+
+		List<Member> pagingList = em.createQuery(rightQuery, Member.class)
+				.setFirstResult(0)
+				.setMaxResults(1)
+				.getResultList();
+
+		for (Member member : pagingList) {
+			System.out.println("pagingList member = " + member.getUserName() + ", team = " + member.getTeam().getName());
+		}
+
+		em.flush();
+		em.clear();
+
+		// 페이징을 억지로 구현할 때
+		String unrighteousQuery2 = "SELECT t FROM Team t ";
+
+		List<Team> pagingList2 = em.createQuery(unrighteousQuery2, Team.class)
+				.setFirstResult(0)
+				.setMaxResults(2)
+				.getResultList();
+
+		System.out.println("pagingList2 size : " + pagingList2.size());
+
+		// Member 데이터 lazy loading으로 인하여 성능이 좋지 않음
+		for (Team team : pagingList2) {
+			System.out.println("pagingList2 team = " + team.getName() + ", members size = " + team.getMembers().size());
+			for (Member member : team.getMembers()) {
+				System.out.println("-> member = " + member);
+			}
+		}
+
+		// 따라서 Team 클래스에 List<Member> members 필드에 @BatchSize(size = 100) 어노테이션 태깅
+	}
+
+	private static void pathExpressionExample(EntityManager em) {
+
+		Team team1 = new Team();
+		team1.setName("team1");
+		em.persist(team1);
+
+		Team team2 = new Team();
+		team2.setName("team2");
+		em.persist(team2);
+
+		Member member1 = new Member();
+		member1.setUserName("member1");
+		member1.setAge(10);
+		member1.setTeam(team1);
+		em.persist(member1);
+
+		Member member2 = new Member();
+		member2.setUserName("member2");
+		member2.setAge(20);
+		member2.setTeam(team2);
+
+		em.persist(member2);
+
+		em.flush();
+		em.clear();
+
+		// 상태 필드
+		String stateQuery = "SELECT m.userName FROM Member m";
+		List<String> resultList1 = em.createQuery(stateQuery, String.class).getResultList();
+		for (String s : resultList1) {
+			System.out.println("result1 String : " + s);
+		}
+
+		// 단일 값 연관 경로 - 탐색 가능
+		// 묵시적 내부 조인 발생
+		String oneValueQuery = "SELECT m.team FROM Member m";
+		List<Team> resultList2 = em.createQuery(oneValueQuery, Team.class).getResultList();
+		for (Team t : resultList2) {
+			System.out.println("resultList2 Team : " + t);
+		}
+
+		// 컬렉션 값 연관 경로 - 탐색 불가능 (컬렉션 자체를 가리키기 때문에 그 안에 필드 정보 등을 가져올 수 없음)
+		// 묵시적 내부 조인 발생
+		String sizeQuery = "SELECT t.members.size FROM Team t";
+		Integer resultList4 = em.createQuery(sizeQuery, Integer.class).getSingleResult();
+		System.out.println("Team members size : " + resultList4);
+
+		String collectionValueQuery = "SELECT t.members FROM Team t";
+		Collection resultList3 = em.createQuery(collectionValueQuery, Collection.class).getResultList();
+		for (Object o : resultList3) {
+			System.out.println("resultList3 Object : " + o);
+		}
+
+		String joinQuery = "SELECT m FROM Team t join t.members m";
+		List<Member> resultList5 = em.createQuery(joinQuery, Member.class).getResultList();
+		for (Member m : resultList5) {
+			System.out.println("resultList5 Member : " + m);
+		}
 	}
 
 	private static void functionExample(EntityManager em) {
@@ -122,7 +456,6 @@ public class JpqlMain {
 		for (String s : resultList7) {
 			System.out.println("resultList7 String : " + s);
 		}
-
 	}
 
 	private static void caseExpressionExample(EntityManager em) {
@@ -163,7 +496,6 @@ public class JpqlMain {
 		for (String s : resultList3) {
 			System.out.println("resultList3 String = " + s);
 		}
-
 	}
 
 	private static void typeExpressionExample(EntityManager em) {
@@ -243,7 +575,6 @@ public class JpqlMain {
 		for (Member resultMember : memberResult2) {
 			System.out.println("memberResult2 member : " + resultMember);
 		}
-
 	}
 
 	private static void pagingExample(EntityManager em) {
@@ -271,7 +602,6 @@ public class JpqlMain {
 		for (Member resultMember : memberResult) {
 			System.out.println("member : " + resultMember);
 		}
-
 	}
 
 	private static void projectionExample(EntityManager em) {
@@ -332,7 +662,6 @@ public class JpqlMain {
 		MemberDTO resultMemberDTO = memberDTOResultList.get(0);
 		System.out.println("resultMemberDTO userName " + resultMemberDTO.getUserName());
 		System.out.println("resultMemberDTO age " + resultMemberDTO.getAge());
-
 	}
 
 	private static void bindParameterExample(EntityManager em) {
