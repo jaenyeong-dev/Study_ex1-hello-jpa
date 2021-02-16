@@ -503,7 +503,7 @@ https://www.inflearn.com/course/ORM-JPA-Basic 참조
     * 객체 타입은 참조를 전달
       * Address a = new Address("Old");
       * Address b = a;
-      * b.setCity("New);
+      * b.setCity("New");
   * 불변 객체(생성 시점 이후 값을 절대 변경할 수 없는 객체)
     * 객체 타입을 수정할 수 없게 작성(부작용 원천 차단)
     * 값 타입은 불변 객체로 설계할 것
